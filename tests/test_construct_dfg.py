@@ -4,6 +4,7 @@ from linnea_inspector.event_log.prepare_event_log import prepare_event_log
 from linnea_inspector.mappings.f_call import f_call
 import sys
 import os
+import pickle
 
 if __name__ == "__main__":
     # python -m tests.test_construct_dfg examples/traces/gls_v1/experiments/traces/algorithm9.traces
@@ -20,5 +21,7 @@ if __name__ == "__main__":
         os.makedirs(outdir)
         
     dfg.save(outdir)
+    with open(os.path.join(outdir, "alg_data.pkl"), "wb") as f:
+        pickle.dump(alg_data, f)
         
     

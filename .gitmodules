@@ -1,0 +1,4 @@
+[submodule "linnea_b_traces"]
+	path = linnea_b_traces
+	url = https://github.com/HPAC/linnea.git
+	branch = traces

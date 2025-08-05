@@ -37,7 +37,7 @@ if __name__ == "__main__":
         
     perspective = RanksPerspective(*dfgs)
     perspective.create_style()
-    graph = perspective.prepare_digraph(rankdir='LR')
+    graph = perspective.prepare_digraph(rankdir='TD')
     
     print(graph)
     

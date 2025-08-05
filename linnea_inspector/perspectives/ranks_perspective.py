@@ -20,7 +20,7 @@ class RanksPerspective(StatisticsColoring):
         self.alg_ranks = compute_partial_ranks(self.alg_measurements, q_max=75, q_min=25)
         
     def compute_stats(self, inv_mapping):
-        self.stats = compute_perf_rank_score(inv_mapping, self.alg_ranks) # adds column 'perf' to inv_mapping
+        self.stats = compute_perf_rank_score(inv_mapping, self.alg_ranks, self.nvariants) # adds column 'perf' to inv_mapping
         if self.stats is None:
             raise ValueError("No statistics computed. Please run compute_stats first.")
         self.activity_ranks = compute_activity_ranks(inv_mapping, group_by='id', on='perf', q_max=75, q_min=25)
@@ -29,9 +29,15 @@ class RanksPerspective(StatisticsColoring):
         
     def _format_label_str(self, row):
        #label_str = f"{row['activity']} ({row['nvariants']}/{self.nvariants})\nAvg. FLOPs: {row['avg_flops']:.2e}\nAvg. Perf: {row['avg_perf']:.2f} FLOPs/ns\nnPR:  {self.ranks[row['activity']]['rank_str']}"
+       
+       rank_score = f"Rank score: {row['rank_score']:.1f}\n" 
+       if row['nvariants'] == self.nvariants:
+           rank_score = "" 
+           
+       
        label_str = (
             f"{row['activity']} ({row['nvariants']}/{self.nvariants})\n"
-            f"Rank score: {row['rank_score']:.1f}\n"
+            f"{rank_score}"
             f"Num. Ranks:  {self.activity_ranks[row['activity']]['nranks']}\n"            
             f"Avg. FLOPs: {row['avg_flops']:.2e}\n"
             f"Avg. Perf: {row['avg_perf']:.2f} F/ns"

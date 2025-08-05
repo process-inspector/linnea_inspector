@@ -1,29 +1,29 @@
 import pandas as pd
 
-def parse_line(line):
+def parse_line(line, sep):
     if line.strip() == "":
         return None
-    parts = line.strip().split(' ')
+    parts = line.strip().split(sep)
     if len(parts) != 5:
         raise ValueError(f"Invalid line format: {line}")
     
     event_record = {
-        'case': parts[0],
-        'time': parts[1],
-        'call': parts[2],
-        'flops': float(parts[3]),
-        'duration': float(parts[4])
+        'case': parts[0].strip(),
+        'time': parts[1].strip(),
+        'call': parts[2].strip(),
+        'flops': float(parts[3].strip()),
+        'duration': float(parts[4].strip())
     }
         
     return event_record
     
 
-def prepare_event_log(trace_file):
+def prepare_event_log(trace_file, sep=';'):
     event_data = []
     alg_data = {'algorithm': None, 'durations': [], 'flops': None}
     with open(trace_file, 'r') as file:
         for line in file:
-            record = parse_line(line)
+            record = parse_line(line, sep)
             if record:
                 if "algorithm" in record['call']:
                     if alg_data['algorithm'] is None:

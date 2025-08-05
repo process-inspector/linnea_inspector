@@ -8,7 +8,8 @@ import os
 
 if __name__ == "__main__":
     
-    # python -m tests.test_difference_perspective examples/traces/gls_v1/experiments/traces/algorithm0.traces examples/traces/gls_v1/experiments/traces/algorithm2.traces 
+    # python -m tests.test_difference_perspective examples/traces/gls_v1/experiments/traces/algorithm0.traces examples/traces/gls_v1/experiments/traces/algorithm2.traces
+    # python -m tests.test_difference_perspective examples/traces/gls_v2/experiments/traces/algorithm40.traces examples/traces/gls_v2/experiments/traces/algorithm42.traces  
     
     trace_file1 = sys.argv[1]
     trace_file2 = sys.argv[2] 

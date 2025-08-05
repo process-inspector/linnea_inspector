@@ -3,8 +3,12 @@ from linnea.algebra.equations import Equations
 from linnea.algebra.properties import Property
 import linnea.config
 from linnea.algorithm_generation.graph.search_graph import SearchGraph
+import random
 
 if __name__ == "__main__":
+    
+    random.seed(0)
+    
     n = 1000
     m = 100
 

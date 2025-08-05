@@ -11,7 +11,7 @@ from partial_ranker import MeasurementsVisualizer
 
 if __name__ == "__main__":
     
-    #  python -m tests.test_ranks_perspective examples/traces/gls_v1/experiments/traces/
+    #  python -m tests.test_ranks_perspective examples/traces/gls_v1.1/experiments/traces/
     
     data_dir = sys.argv[1]
     # get the list of all .traces files in the directory
@@ -51,8 +51,13 @@ if __name__ == "__main__":
         print(f'{activity}: {rank["nranks"]}')
         
     print(f"Num. VR: {perspective.alg_ranks['nranks']}")    
+    
+    print(f"M1: {perspective.alg_ranks['m1']}")
+    print(f"M2: {perspective.alg_ranks['m2']}")
+    print(f"M3: {perspective.alg_ranks['m3']}")
+    
     obj_list = sorted(list(perspective.alg_measurements.keys()))
-    obj_list.remove('algorithm2')
+    # obj_list.remove('algorithm2')
     mv = MeasurementsVisualizer(perspective.alg_measurements)
     fig = mv.show_measurements_boxplots(unit='ns', obj_list=obj_list, scale = 0.5)
     fig.savefig(os.path.join(outdir, 'variants_bp.svg'), format="svg", bbox_inches='tight')

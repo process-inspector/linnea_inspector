@@ -11,6 +11,8 @@ from partial_ranker import MeasurementsVisualizer
 
 if __name__ == "__main__":
     
+    #  python -m tests.test_ranks_perspective examples/traces/gls_v1/experiments/traces/
+    
     data_dir = sys.argv[1]
     # get the list of all .traces files in the directory
     trace_files = glob.glob(str(Path(data_dir) / "*.traces"))
@@ -35,7 +37,7 @@ if __name__ == "__main__":
         
     perspective = RanksPerspective(*dfgs)
     perspective.create_style()
-    graph = perspective.prepare_digraph(rankdir='TD')
+    graph = perspective.prepare_digraph(rankdir='LR')
     
     print(graph)
     
@@ -43,18 +45,22 @@ if __name__ == "__main__":
     if not os.path.exists(outdir):
         os.makedirs(outdir)
     
-    graph.render(os.path.join(outdir,'dfg_ranks'), format='svg', cleanup=True)
+    graph.render(os.path.join(outdir,'dfg_ranks_perspective'), format='svg', cleanup=True)
     
     for activity, rank in perspective.activity_ranks.items():
-        print(f'{activity}: {rank["rank_str"]}')
+        print(f'{activity}: {rank["nranks"]}')
         
-    print(f"Num. VR: {perspective.variant_ranks['rank_str']}")    
+    print(f"Num. VR: {perspective.variant_ranks['nranks']}")    
     obj_list = sorted(list(perspective.variants_measurements.keys()))
     obj_list.remove('algorithm2')
     mv = MeasurementsVisualizer(perspective.variants_measurements)
     fig = mv.show_measurements_boxplots(unit='ns', obj_list=obj_list, scale = 0.5)
     fig.savefig(os.path.join(outdir, 'variants_bp.svg'), format="svg", bbox_inches='tight')
     
+    measurements = perspective.activity_ranks['gemv']['measurements']
+    mv = MeasurementsVisualizer(measurements)
+    fig = mv.show_measurements_boxplots(unit='ns', scale=0.5)
+    fig.savefig(os.path.join(outdir, 'gemv_bp.svg'), format="svg", bbox_inches='tight')    
 
     
     

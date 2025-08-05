@@ -7,14 +7,12 @@ def compute_perf(inv_mapping):
         df['perf'] = np.where(df['duration'] ==0 , np.nan, df['flops'] / df['duration'])
         avg_perf = df['perf'].mean()
         avg_flops = df['flops'].mean()
-        nvariants = df['id'].nunique()
         count = len(df)
         
         stats.append({
             'activity': activity,
             'avg_perf': avg_perf,
             'avg_flops': avg_flops,
-            'nvariants': nvariants,
             'count': count,  
         })
         
@@ -22,7 +20,7 @@ def compute_perf(inv_mapping):
     return stats_df
 
 
-def compute_perf_avg_ranks(inv_mapping, variant_ranks):
+def compute_perf_rank_score(inv_mapping, variant_ranks):
     stats = []
     for activity, df in inv_mapping.items():
         df['perf'] = np.where(df['duration'] ==0 , np.nan, df['flops'] / df['duration'])
@@ -50,8 +48,7 @@ def compute_perf_avg_ranks(inv_mapping, variant_ranks):
             'avg_flops': avg_flops,
             'nvariants': nvariants,
             'count': count,
-            'avg_ranks': f"{m1:.1f}-{m2:.1f}-{m3:.1f}",
-            'rank_val': m1 + m2 + m3
+            'rank_score': m1
         })
     
     stats_df = pd.DataFrame(stats)

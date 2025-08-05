@@ -8,12 +8,18 @@ def compute_perf(inv_mapping):
         avg_perf = df['perf'].mean()
         avg_flops = df['flops'].mean()
         count = len(df)
+        nvariants = None
+        try:
+            nvariants = df['id'].nunique()
+        except KeyError:
+            pass
         
         stats.append({
             'activity': activity,
             'avg_perf': avg_perf,
             'avg_flops': avg_flops,
-            'count': count,  
+            'count': count,
+            'nvariants': nvariants 
         })
         
     stats_df = pd.DataFrame(stats)

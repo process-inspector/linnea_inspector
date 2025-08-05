@@ -50,10 +50,10 @@ if __name__ == "__main__":
     for activity, rank in perspective.activity_ranks.items():
         print(f'{activity}: {rank["nranks"]}')
         
-    print(f"Num. VR: {perspective.variant_ranks['nranks']}")    
-    obj_list = sorted(list(perspective.variants_measurements.keys()))
+    print(f"Num. VR: {perspective.alg_ranks['nranks']}")    
+    obj_list = sorted(list(perspective.alg_measurements.keys()))
     obj_list.remove('algorithm2')
-    mv = MeasurementsVisualizer(perspective.variants_measurements)
+    mv = MeasurementsVisualizer(perspective.alg_measurements)
     fig = mv.show_measurements_boxplots(unit='ns', obj_list=obj_list, scale = 0.5)
     fig.savefig(os.path.join(outdir, 'variants_bp.svg'), format="svg", bbox_inches='tight')
     

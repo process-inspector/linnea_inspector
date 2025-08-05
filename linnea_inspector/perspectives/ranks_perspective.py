@@ -10,17 +10,17 @@ class RanksPerspective(StatisticsColoring):
         super().__init__(dfg)
         self.color_by = "rank_score"
         self.activity_ranks = None
-        self.variant_ranks = None
+        self.alg_ranks = None
         self.nvariants = len(dfgs)
         
-        self.variants_measurements = {}
+        self.alg_measurements = {}
         for dfg in dfgs:
-            self.variants_measurements[dfg.id] = dfg.info['durations']
+            self.alg_measurements[dfg.id] = dfg.info['durations']
             
-        self.variant_ranks = compute_partial_ranks(self.variants_measurements)
+        self.alg_ranks = compute_partial_ranks(self.alg_measurements)
         
     def compute_stats(self, inv_mapping):
-        self.stats = compute_perf_rank_score(inv_mapping, self.variant_ranks) # adds column 'perf' to inv_mapping
+        self.stats = compute_perf_rank_score(inv_mapping, self.alg_ranks) # adds column 'perf' to inv_mapping
         if self.stats is None:
             raise ValueError("No statistics computed. Please run compute_stats first.")
         self.activity_ranks = compute_activity_ranks(inv_mapping, group_by='id', on='perf')

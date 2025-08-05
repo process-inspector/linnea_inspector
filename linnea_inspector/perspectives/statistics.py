@@ -20,7 +20,7 @@ def compute_perf(inv_mapping):
     return stats_df
 
 
-def compute_perf_rank_score(inv_mapping, variant_ranks):
+def compute_perf_rank_score(inv_mapping, alg_ranks):
     stats = []
     for activity, df in inv_mapping.items():
         df['perf'] = np.where(df['duration'] ==0 , np.nan, df['flops'] / df['duration'])
@@ -34,9 +34,9 @@ def compute_perf_rank_score(inv_mapping, variant_ranks):
         m2 = 0
         m3 = 0
         for variant in variants:
-            m1 += variant_ranks['m1'][variant]
-            m2 += variant_ranks['m2'][variant]
-            m3 += variant_ranks['m3'][variant]
+            m1 += alg_ranks['m1'][variant]
+            m2 += alg_ranks['m2'][variant]
+            m3 += alg_ranks['m3'][variant]
         
         m1 /= len(variants)
         m2 /= len(variants)

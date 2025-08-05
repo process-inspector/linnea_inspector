@@ -56,12 +56,9 @@ function algorithm2(ml0::Array{Float64,2}, ml1::Array{Float64,2}, ml2::Array{Flo
     println("$(run_id) $(t1) gemv 200000 $(t2-t1)")
 
     # tmp14: ml3, symmetric_lower_triangular, tmp21: ml4, full
-    t1 = time_ns()
     for i = 1:100-1;
         view(ml3, i, i+1:100)[:] = view(ml3, i+1:100, i);
     end;
-    t2 = time_ns()
-    println("$(run_id) $(t1) view 1000000 $(t2-t1)")
 
     # (Q16 R17) = tmp14
     t1 = time_ns()

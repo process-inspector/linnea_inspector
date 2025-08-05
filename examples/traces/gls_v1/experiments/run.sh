@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# srun -c 12 run.sh
+
 julia run_algorithm0.jl > traces/algorithm0.traces
 julia run_algorithm1.jl > traces/algorithm1.traces
 julia run_algorithm2.jl > traces/algorithm2.traces

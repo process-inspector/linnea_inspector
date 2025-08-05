@@ -1,5 +1,7 @@
 using LinearAlgebra
 using Random
+using LinearAlgebra.BLAS
+BLAS.set_num_threads(12)
 
 include("../algorithms/Julia/generated/algorithm7.jl")  # Import the function
 

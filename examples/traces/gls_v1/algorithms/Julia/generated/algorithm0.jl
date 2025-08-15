@@ -23,21 +23,21 @@ function algorithm0(ml0::Array{Float64,2}, ml1::Array{Float64,2}, ml2::Array{Flo
     t1 = time_ns()
     LAPACK.potrf!('L', ml1)
     t2 = time_ns()
-    println("$(run_id) $(t1) LAPACK.potrf 333333333.3333333 $(t2-t1)")
+    println("$(run_id); $(t1); LAPACK.potrf; 333333333.3333333; $(t2-t1)")
 
     # X: ml0, full, y: ml2, full, L2: ml1, lower_triangular
     # tmp12 = (L2^-1 X)
     t1 = time_ns()
     trsm!('L', 'L', 'N', 'N', 1.0, ml1, ml0)
     t2 = time_ns()
-    println("$(run_id) $(t1) trsm 100000000 $(t2-t1)")
+    println("$(run_id); $(t1); trsm; 100000000; $(t2-t1)")
 
     # y: ml2, full, L2: ml1, lower_triangular, tmp12: ml0, full
     # tmp38 = (L2^-1 y)
     t1 = time_ns()
     trsv!('L', 'N', 'N', ml1, ml2)
     t2 = time_ns()
-    println("$(run_id) $(t1) trsv 1000000 $(t2-t1)")
+    println("$(run_id); $(t1); trsv; 1000000; $(t2-t1)")
 
     # tmp12: ml0, full, tmp38: ml2, full
     ml3 = Array{Float64}(undef, 100, 100)
@@ -45,7 +45,7 @@ function algorithm0(ml0::Array{Float64,2}, ml1::Array{Float64,2}, ml2::Array{Flo
     t1 = time_ns()
     syrk!('L', 'T', 1.0, ml0, 0.0, ml3)
     t2 = time_ns()
-    println("$(run_id) $(t1) syrk 10000000 $(t2-t1)")
+    println("$(run_id); $(t1); syrk; 10000000; $(t2-t1)")
 
     # tmp12: ml0, full, tmp38: ml2, full, tmp14: ml3, symmetric_lower_triangular
     ml4 = Array{Float64}(undef, 100)
@@ -53,31 +53,31 @@ function algorithm0(ml0::Array{Float64,2}, ml1::Array{Float64,2}, ml2::Array{Flo
     t1 = time_ns()
     gemv!('T', 1.0, ml0, ml2, 0.0, ml4)
     t2 = time_ns()
-    println("$(run_id) $(t1) gemv 200000 $(t2-t1)")
+    println("$(run_id); $(t1); gemv; 200000; $(t2-t1)")
 
     # tmp14: ml3, symmetric_lower_triangular, tmp21: ml4, full
     # (L15 L15^T) = tmp14
     t1 = time_ns()
     LAPACK.potrf!('L', ml3)
     t2 = time_ns()
-    println("$(run_id) $(t1) LAPACK.potrf 333333.3333333333 $(t2-t1)")
+    println("$(run_id); $(t1); LAPACK.potrf; 333333.3333333333; $(t2-t1)")
 
     # tmp21: ml4, full, L15: ml3, lower_triangular
     # tmp23 = (L15^-1 tmp21)
     t1 = time_ns()
     trsv!('L', 'N', 'N', ml3, ml4)
     t2 = time_ns()
-    println("$(run_id) $(t1) trsv 10000 $(t2-t1)")
+    println("$(run_id); $(t1); trsv; 10000; $(t2-t1)")
 
     # L15: ml3, lower_triangular, tmp23: ml4, full
     # tmp24 = (L15^-T tmp23)
     t1 = time_ns()
     trsv!('L', 'T', 'N', ml3, ml4)
     t2 = time_ns()
-    println("$(run_id) $(t1) trsv 10000 $(t2-t1)")
+    println("$(run_id); $(t1); trsv; 10000; $(t2-t1)")
 
     t_end = time_ns()
-    println("$(run_id) $(t_end) algorithm0 444886666.6666666 $(t_end-t_start)")
+    println("$(run_id); $(t_end); algorithm0; 444886666.6666666; $(t_end-t_start)")
     # tmp24: ml4, full
     # b = tmp24
     return (ml4)

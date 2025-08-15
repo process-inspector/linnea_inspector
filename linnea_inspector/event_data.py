@@ -1,6 +1,6 @@
 import pandas as pd
 import os
-from process_inspector.event_log import EventLog, MetaData
+from process_inspector.meta_data import MetaData
 
 def parse_event(line, sep):
     if line.strip() == "":
@@ -44,9 +44,9 @@ def prepare(trace_file, sep=';'):
         events_df = pd.DataFrame(events_data)
         events_df['time'] = pd.to_datetime(events_df['time'].astype(float), unit='ns')
         events_df['alg'] = alg
-        event_log = EventLog(events_df, case_key='iter', order_key='time', obj_key='alg')
+        # event_log = EventLog(events_df, case_key='iter', order_key='time', obj_key='alg')
     else:
         raise ValueError("No valid event records found in the trace file.")
         
         
-    return event_log, meta_data         
+    return events_df, meta_data         

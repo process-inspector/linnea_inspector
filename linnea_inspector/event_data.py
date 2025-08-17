@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 from process_inspector.meta_data import MetaData
+import numpy as np
 
 def parse_event(line, sep):
     if line.strip() == "":
@@ -33,9 +34,10 @@ def prepare(trace_file, sep=';'):
                 if "algorithm" in record['call']:
                     # Add object metadata
                     alg = record['call']
-                    if not meta_data.get_obj_attr(alg, 'flops'):
-                        meta_data.add_obj_attr(obj=alg, attr='flops', value=record['flops'])      
-                    meta_data.add_case_attr(case=record['iter'], attr='duration', value=record['duration'])
+                    if not meta_data.obj_data:
+                        meta_data.add_obj_record({'alg': alg, 'flops': record['flops']})   
+                    perf = record['flops'] / record['duration'] if record['duration'] > 0 else np.nan
+                    meta_data.add_case_record({'alg': alg, 'iter': record['iter'], 'perf': perf})
                 else:
                     # Add event record
                     events_data.append(record)

@@ -37,7 +37,7 @@ def prepare(trace_file, sep=';'):
                     if not meta_data.obj_data:
                         meta_data.add_obj_record({'alg': alg, 'flops': record['flops']})   
                     perf = record['flops'] / record['duration'] if record['duration'] > 0 else np.nan
-                    meta_data.add_case_record({'alg': alg, 'iter': record['iter'], 'perf': perf})
+                    meta_data.add_case_record({'alg': alg, 'iter': record['iter'], 'duration':record['duration'], 'perf': perf})
                 else:
                     # Add event record
                     events_data.append(record)

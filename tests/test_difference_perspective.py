@@ -1,39 +1,39 @@
+from linnea_inspector.event_data  import prepare
+from linnea_inspector.classifiers.f_call import f_call
+
+from process_inspector.event_log import EventLog
 from process_inspector.activity_log import ActivityLog
-from process_inspector.dfg import DFG
-from linnea_inspector.event_log.prepare_event_log import prepare_event_log
-from linnea_inspector.mappings.f_call import f_call
-from linnea_inspector.perspectives.difference_perspective import DifferencePerspective
+
+from process_inspector.dfg.dfg import DFG
+from linnea_inspector.perspectives.difference_perspective import LinneaDFGDifferencePerspective
+
 import sys
 import os
 
-if __name__ == "__main__":
+def test():
+    # Example test (from root directory):
     
-    # python -m tests.test_difference_perspective examples/traces/gls_v1/experiments/traces/algorithm0.traces examples/traces/gls_v1/experiments/traces/algorithm2.traces
-    # python -m tests.test_difference_perspective examples/traces/gls_v2/experiments/traces/algorithm40.traces examples/traces/gls_v2/experiments/traces/algorithm42.traces  
+    trace_file1 = "examples/traces/gls_v2/experiments/traces/algorithm0.traces"
+    trace_file2 = "examples/traces/gls_v2/experiments/traces/algorithm40.traces"
     
-    trace_file1 = sys.argv[1]
-    trace_file2 = sys.argv[2] 
+    event_data, meta_data = prepare(trace_file1)
+    event_log = EventLog(event_data, case_key=['alg','iter'], order_key='time', obj_key='alg')
+    activity_log = ActivityLog(event_log, 4, f_call)    
+    dfg1 = DFG(activity_log)
     
-    event_log1, alg_data1 = prepare_event_log(trace_file1)
-    activity_log1 = ActivityLog(event_log1, 1, f_call)
-    dfg1 = DFG(activity_log1)
-    dfg1.id = alg_data1['algorithm']
-    dfg1.info = alg_data1
+    event_data, meta_data = prepare(trace_file2)
+    event_log = EventLog(event_data, case_key=['alg','iter'], order_key='time', obj_key='alg')
+    activity_log = ActivityLog(event_log, 4, f_call)    
+    dfg2 = DFG(activity_log)
     
-    event_log2, alg_data2 = prepare_event_log(trace_file2)
-    activity_log2 = ActivityLog(event_log2, 1, f_call)
-    dfg2 = DFG(activity_log2)
-    dfg2.id = alg_data2['algorithm']
-    dfg2.info = alg_data2
-    
-    perspective = DifferencePerspective(dfg1, dfg2)
+    perspective = LinneaDFGDifferencePerspective(dfg1, dfg2)
     perspective.create_style()
     graph = perspective.prepare_digraph(rankdir='TD')
-    
-    outdir = "examples/dfgs/tmp"
-    if not os.path.exists(outdir):
-        os.makedirs(outdir)
-        
-    graph.render(os.path.join(outdir,'dfg_difference_perspective'), format='svg', cleanup=True)
+    print(graph)
+    graph.render(os.path.join('tmp', 'dfg_diff'), format='svg', cleanup=True)
+    print("SUCCESS")
+
+if __name__ == "__main__":
+    test()
     
     

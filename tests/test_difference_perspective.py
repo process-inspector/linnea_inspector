@@ -5,7 +5,7 @@ from process_inspector.event_log import EventLog
 from process_inspector.activity_log import ActivityLog
 
 from process_inspector.dfg.dfg import DFG
-from linnea_inspector.perspectives.difference_perspective import LinneaDFGDifferencePerspective
+from linnea_inspector.dfg.difference_perspective import LinneaDFGDifferencePerspective
 
 import sys
 import os

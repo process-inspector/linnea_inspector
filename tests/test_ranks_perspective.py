@@ -8,7 +8,7 @@ from process_inspector.dfg.dfg import DFG
 from process_inspector.dfg.add_dfgs import add_dfgs
 from process_inspector.model_data_utils import concat_activity_events, concat_meta_data
 
-from linnea_inspector.perspectives.ranks_perspective import LinneaDFGRanksPerspective
+from linnea_inspector.dfg.ranks_perspective import LinneaDFGRanksPerspective
 
 import sys
 import os

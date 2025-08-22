@@ -29,7 +29,7 @@ def generate_algorithm_codes(equations, alg_codes_path, num_algs_limit=50, time_
                        no_duplicates=True)
     
 
-def generate_experiment_codes(alg_codes_path, exp_template_path, **kwargs):
+def generate_experiment_codes(alg_codes_path, exp_template_path,tag='', **kwargs):
     # Ensure paths exist
     alg_codes_path = os.path.abspath(alg_codes_path)
     if not os.path.isdir(alg_codes_path):
@@ -51,7 +51,7 @@ def generate_experiment_codes(alg_codes_path, exp_template_path, **kwargs):
         if f.startswith("algorithm") and f.endswith(".jl")
     ]
 
-    exp_codes_path = os.path.join(alg_codes_path, "Julia/experiments")
+    exp_codes_path = os.path.join(alg_codes_path, f"Julia/experiments{tag}")
     if os.path.exists(exp_codes_path):
         #remove existing directory
         shutil.rmtree(exp_codes_path)

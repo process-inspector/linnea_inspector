@@ -56,9 +56,8 @@ def dfg_synthesis(trace_dir, save_model=False):
     print(f"M3: {perspective.alg_ranks['m3']}")
     print(perspective.alg_ranks['nranks'])
     
-    synthesis_dir = os.path.join(exp_dir, "synthesis")
+    synthesis_dir = os.path.join(trace_dir, "synthesis")
     os.makedirs(synthesis_dir, exist_ok=True)
-    print(graph)
     graph.render(os.path.join(synthesis_dir, 'dfg'), format='svg', cleanup=True)
     if save_model:
         save_model_data(os.path.join(synthesis_dir, "model_data"), full_dfg, full_activity_events, full_meta_data)

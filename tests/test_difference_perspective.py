@@ -30,7 +30,7 @@ def test():
     perspective.create_style()
     graph = perspective.prepare_digraph(rankdir='TD')
     print(graph)
-    graph.render(os.path.join('tmp', 'dfg_diff'), format='svg', cleanup=True)
+    graph.render(os.path.join('tests/dfgs', 'dfg_diff'), format='svg', cleanup=True)
     print("SUCCESS")
 
 if __name__ == "__main__":

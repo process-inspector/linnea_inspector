@@ -53,7 +53,7 @@ def generate(n,m, n_algs, nthreads, nreps, regenerate=False):
 if __name__ == "__main__":
     
     random.seed(0)
-    generate(1000, 100, n_algs=50, nthreads=12, nreps=10, regenerate=True)
+    generate(1000, 100, n_algs=20, nthreads=12, nreps=10, regenerate=True)
     
 
     

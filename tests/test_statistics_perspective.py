@@ -34,7 +34,7 @@ def test2():
     perspective.create_style()
     graph = perspective.prepare_digraph(rankdir='TD')
     print(graph)
-    graph.render(os.path.join('tmp', 'dfg_stats2'), format='svg', cleanup=True)
+    graph.render(os.path.join('tests/dfgs', 'dfg_stats2'), format='svg', cleanup=True)
     print("SUCCESS")
 
 def test1():
@@ -50,7 +50,7 @@ def test1():
     perspective.create_style()
     graph = perspective.prepare_digraph(rankdir='TD')
     print(graph)
-    graph.render(os.path.join('tmp', 'dfg_stats1'), format='svg', cleanup=True)
+    graph.render(os.path.join('tests/dfgs', 'dfg_stats1'), format='svg', cleanup=True)
     print("SUCCESS")
 
 

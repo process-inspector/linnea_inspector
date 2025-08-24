@@ -37,7 +37,7 @@ def test1():
     perspective.create_style()
     graph = perspective.prepare_digraph(rankdir='TD')
     print(graph)
-    graph.render(os.path.join('tmp', 'dfg_ranks'), format='svg', cleanup=True)
+    graph.render(os.path.join('tests/dfgs', 'dfg_ranks'), format='svg', cleanup=True)
     
     for key, value in perspective.alg_ranks.items():
         print(f"{key}: {value}")

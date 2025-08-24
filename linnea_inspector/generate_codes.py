@@ -13,6 +13,7 @@ def generate_algorithm_codes(equations, alg_codes_path, num_algs_limit=50, time_
         
     linnea.config.set_output_code_path(os.path.dirname(alg_codes_path))
     linnea.config.init()
+    linnea.config.instrument = True
     
     graph = SearchGraph(equations)
     graph.generate(time_limit=time_limit_sec,

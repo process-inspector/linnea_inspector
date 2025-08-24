@@ -7,7 +7,7 @@ import sys
 import os
 
 def test():
-    trace_file = "examples/traces/gls_v2/experiments/traces/algorithm0.traces"
+    trace_file = "tests/traces/algorithm0.traces"
     event_data, meta_data = prepare(trace_file)
     event_log = EventLog(event_data, case_key=['alg','iter'], order_key='time', obj_key='alg')
     print(f"Num events: {event_log.n_events}, Num cases: {event_log.n_cases}")

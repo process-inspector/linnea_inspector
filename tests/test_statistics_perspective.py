@@ -14,8 +14,8 @@ import sys
 import os
 
 def test2():
-    trace_file1 = "examples/traces/gls_v2/experiments/traces/algorithm0.traces"
-    trace_file2 = "examples/traces/gls_v2/experiments/traces/algorithm10.traces"
+    trace_file1 = "tests/traces/algorithm0.traces"
+    trace_file2 = "tests/traces/algorithm10.traces"
     
     event_data, meta_data = prepare(trace_file1)
     event_log = EventLog(event_data, case_key=['alg','iter'], order_key='time', obj_key='alg')
@@ -39,7 +39,7 @@ def test2():
 
 def test1():
     
-    trace_file = "examples/traces/gls_v2/experiments/traces/algorithm0.traces"
+    trace_file = "tests/traces/algorithm0.traces"
     event_data, meta_data = prepare(trace_file)
     event_log = EventLog(event_data, case_key=['alg','iter'], order_key='time', obj_key='alg')
     

@@ -1,10 +1,12 @@
 from linnea.algebra.expression import Matrix, Vector, Equal, Times, Inverse, Transpose
 from linnea.algebra.equations import Equations
 from linnea.algebra.properties import Property
+import linnea.config
+from linnea.algorithm_generation.graph.search_graph import SearchGraph
 
 import os
 import random
-from linnea_inspector.generate_codes import generate_algorithm_codes, generate_experiment_codes
+from linnea_inspector.generate_codes import  generate_experiment_codes
 
 def generate(n,m, n_algs, nthreads, nreps, regenerate=False):
 
@@ -19,8 +21,24 @@ def generate(n,m, n_algs, nthreads, nreps, regenerate=False):
         b = Vector("b", (m, 1))
 
         equations = Equations(Equal(b, Times(Inverse(Times(Transpose(X), Inverse(M), X ) ), Transpose(X), Inverse(M), y)))
+            
+        linnea.config.set_output_code_path(os.path.dirname(alg_codes_path))
+        linnea.config.init()
+        linnea.config.instrument = True
         
-        generate_algorithm_codes(equations, alg_codes_path=alg_codes_path, num_algs_limit=n_algs, time_limit_sec=60)
+        graph = SearchGraph(equations)
+        graph.generate(time_limit=60,
+                    merging=True,
+                    dead_ends=True,
+                    pruning_factor=1.2)
+
+        graph.write_output(code=True,
+                        generation_steps=True,
+                        output_name=os.path.basename(alg_codes_path),
+                        experiment_code=False,
+                        algorithms_limit=n_algs,
+                        graph=False,
+                        no_duplicates=True)
     
     exp_template_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "run_template.jl")
     template_args = {
@@ -35,7 +53,7 @@ def generate(n,m, n_algs, nthreads, nreps, regenerate=False):
 if __name__ == "__main__":
     
     random.seed(0)
-    generate(1000, 100, n_algs=50, nthreads=12, nreps=10, regenerate=False)
+    generate(1000, 100, n_algs=50, nthreads=12, nreps=10, regenerate=True)
     
 
     

@@ -7,7 +7,7 @@ import os
 def test():
     # Example test (from root directory):
     
-    trace_file = "examples/traces/gls_v2/experiments/traces/algorithm0.traces"
+    trace_file = "tests/traces/algorithm0.traces"
     event_data, meta_data = prepare(trace_file)
     event_log = EventLog(event_data, case_key=['alg','iter'], order_key='time', obj_key='alg')
     

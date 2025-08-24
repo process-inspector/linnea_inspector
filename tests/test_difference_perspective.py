@@ -13,8 +13,8 @@ import os
 def test():
     # Example test (from root directory):
     
-    trace_file1 = "examples/traces/gls_v2/experiments/traces/algorithm0.traces"
-    trace_file2 = "examples/traces/gls_v2/experiments/traces/algorithm40.traces"
+    trace_file1 = "tests/traces/algorithm0.traces"
+    trace_file2 = "tests/traces/algorithm45.traces"
     
     event_data, meta_data = prepare(trace_file1)
     event_log = EventLog(event_data, case_key=['alg','iter'], order_key='time', obj_key='alg')

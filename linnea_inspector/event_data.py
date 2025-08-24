@@ -4,6 +4,9 @@ from process_inspector.meta_data import MetaData
 import numpy as np
 
 def parse_event(line, sep):
+    if not "[#LT]" in line:
+        return None
+    line = line.split("[#LT] ")[-1]
     if line.strip() == "":
         return None
     parts = line.strip().split(sep)

@@ -1,0 +1,22 @@
+#!/bin/bash
+#SBATCH --job-name=linnea_gls
+#SBATCH --account=hpc2n2025-096
+#SBATCH --time=00:30:00
+#SBATCH --nodes=1
+#SBATCH --ntasks=1            
+#SBATCH --cpus-per-task=14
+#SBATCH --gpus-per-node=1     
+##SBATCH -C skylake
+
+source /proj/nobackup/aravind/linnea_inspector/data/venvs/linnea_keb/activate.sh
+cd /proj/nobackup/aravind/linnea_inspector/data/thesis/50algorithms_1000_100/Julia/experimentsKEB
+
+lscpu > nodeinfo.txt 
+srun -c 14 bash run.sh
+
+
+
+
+
+
+

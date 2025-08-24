@@ -1,0 +1,23 @@
+using LinearAlgebra
+using Random
+using LinearAlgebra.BLAS
+BLAS.set_num_threads(12) 
+
+include("../generated/algorithm47.jl")  # Import the function
+
+const REP = 10  # Number of repetitions for the algorithm run
+
+# Generate inputs
+Random.seed!(123)
+X = randn(1000, 100)
+A = randn(1000, 1000)
+M = A * A' + 1e-3 * I  # SPD matrix
+y = randn(1000)
+
+# Call the algorithm
+for i in 1:REP
+    ENV["LINNEA_RUN_ID"] = string(i)  # Set the run ID for each iteration
+    cache_scrub = randn(100_000_000)
+    b = algorithm47(copy(X), copy(M), copy(y))
+end
+

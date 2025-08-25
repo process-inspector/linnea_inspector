@@ -1,0 +1,20 @@
+Activity: potrf
+    iter                          time          kernel         flops      dur          alg  el:activity
+0      1 1970-01-05 09:13:15.226549585  LAPACK.potrf  3.333333e+08  4390468.0   algorithm1       potrf
+3      1 1970-01-05 09:13:15.231793469  LAPACK.potrf  3.333333e+05   143355.0   algorithm1       potrf
+16     2 1970-01-05 09:13:15.670055066  LAPACK.potrf  3.333333e+08  3840715.0   algorithm1       potrf
+19     2 1970-01-05 09:13:15.674602258  LAPACK.potrf  3.333333e+05   135803.0   algorithm1       potrf
+81     1 1970-01-05 09:13:48.202369969  LAPACK.potrf  3.333333e+08  4503337.0  algorithm15       potrf
+85     1 1970-01-05 09:13:48.207800984  LAPACK.potrf  3.333333e+05   144646.0  algorithm15       potrf
+101    2 1970-01-05 09:13:48.648633877  LAPACK.potrf  3.333333e+08  3810230.0  algorithm15       potrf
+105    2 1970-01-05 09:13:48.653191875  LAPACK.potrf  3.333333e+05   140991.0  algorithm15       potrf
+
+Activity: trsm
+    iter                          time  kernel        flops     dur          alg                el:activity
+1      1 1970-01-05 09:13:15.230963858  trsm  100000000.0  553769.0   algorithm1                trsm
+17     2 1970-01-05 09:13:15.673940528  trsm  100000000.0  417034.0   algorithm1                 trsm
+82     1 1970-01-05 09:13:48.206878103  trsm  100000000.0  582341.0  algorithm15                 trsm
+102    2 1970-01-05 09:13:48.652448634  trsm  100000000.0  428741.0  algorithm15                 trsm
+...
+...
+

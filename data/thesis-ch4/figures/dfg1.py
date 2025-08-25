@@ -33,7 +33,7 @@ def dfg1():
     
     perspective = DFGPerspective(dfg)
     perspective.create_style()
-    graph = perspective.prepare_digraph(rankdir='TD')
+    graph = perspective.prepare_digraph(rankdir='LR')
     print(graph)
     graph.render('dfg1', format='svg', cleanup=True)
     print("SUCCESS")

@@ -26,7 +26,7 @@ def edge_events():
     
     event_log = EventLog(event_data, case_key=['alg','iter'], order_key='time', obj_key='alg')
     activity_log = ActivityLog(event_log, f_call)
-    reverse_maps = DFGReverseMaps(activity_log) 
+    reverse_maps = DFGReverseMaps(activity_log, next_attrs = ['flops', 'time']) 
     
     for edge, events in reverse_maps.edges_map.items():
         #only events where iter == 1 or 2

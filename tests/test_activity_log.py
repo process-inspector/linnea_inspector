@@ -12,16 +12,18 @@ def test():
     event_log = EventLog(event_data, case_key=['alg','iter'], order_key='time', obj_key='alg')
     print(f"Num events: {event_log.n_events}, Num cases: {event_log.n_cases}")
     
-    activity_log = ActivityLog(event_log, 4, f_call) 
+    activity_log = ActivityLog(event_log, f_call) 
     
-    print(activity_log.activity_log)
-    activity_events = activity_log.activity_events
-    for activity, df in activity_events.items():
-        print(f"Activity: {activity}, DataFrame:\n {df}")
-        break  
+    for case, classified_trace in activity_log.c_event_log.items():
+        print(case)
+        print(classified_trace)
+        break
+    
+    print(activity_log.activity_language)
+    print(activity_log.activities)
     
         
-    print(f"Num activities: {activity_log.n_activities}, Num variants: {activity_log.n_variants}")
+    print(f"Num activities: {len(activity_log.activities)}, Num variants: {activity_log.n_variants}")
     print("SUCCESS") 
 
 if __name__ == "__main__":

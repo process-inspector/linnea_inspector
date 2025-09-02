@@ -18,12 +18,12 @@ def test():
     
     event_data, meta_data = prepare(trace_file1)
     event_log = EventLog(event_data, case_key=['alg','iter'], order_key='time', obj_key='alg')
-    activity_log = ActivityLog(event_log, 4, f_call)    
+    activity_log = ActivityLog(event_log, f_call)    
     dfg1 = DFG(activity_log)
     
     event_data, meta_data = prepare(trace_file2)
     event_log = EventLog(event_data, case_key=['alg','iter'], order_key='time', obj_key='alg')
-    activity_log = ActivityLog(event_log, 4, f_call)    
+    activity_log = ActivityLog(event_log, f_call)    
     dfg2 = DFG(activity_log)
     
     perspective = LinneaDFGDifferencePerspective(dfg1, dfg2)

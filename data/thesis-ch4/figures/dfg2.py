@@ -29,7 +29,7 @@ def dfg2():
     
     perspective = LinneaDFGDifferencePerspective(dfg1, dfg2)
     perspective.create_style()
-    graph = perspective.prepare_digraph(rankdir='TD')
+    graph = perspective.prepare_digraph(rankdir='LR')
     print(graph)
     graph.render('dfg2', format='svg', cleanup=True)
     print("SUCCESS")

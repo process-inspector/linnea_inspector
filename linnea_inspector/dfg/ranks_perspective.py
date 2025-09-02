@@ -1,72 +1,74 @@
 import pandas as pd
-from process_inspector.dfg.statistics_perspective import DFGStatisticsPerspective
-from process_inspector.compute_ranks import compute_activity_ranks, compute_meta_data_ranks
+from process_inspector.dfg.ranks_perspective import DFGRanksPerspective
+from process_inspector.compute_ranks import compute_activity_ranks
 import numpy as np
 # from .statistics import compute_perf
 
-class LinneaDFGRanksPerspective(DFGStatisticsPerspective):
-    def __init__(self,dfg, activity_events, case_data):
-        self.total_variants = case_data['alg'].nunique()
-        self.alg_ranks = None
-        self.activity_ranks = None     
-        super().__init__(dfg, activity_events, case_data)
-        self.color_by = "rank_score"
+class LinneaDFGRanksPerspective(DFGRanksPerspective):
+    def __init__(self,dfg, reverse_maps, meta_data):   
+        super().__init__(dfg, reverse_maps, meta_data, obj_key='alg', obj_perf_key='duration')
+        self.activities_stats = None
+        self.activity_ranks = None      
         
-        
-    def _compute_stats(self, activity_events, case_data):
+    def _compute_activities_stats(self):
         stats = []
         
-        for activity, df in activity_events.items():
+        for activity, df in self.reverse_maps.activities_map.items():
             df['perf'] = np.where(df['duration'] ==0 , np.nan, df['flops'] / df['duration'])
                     
-        self.alg_ranks = compute_meta_data_ranks(case_data, group_by='alg', on='duration')
-        self.activity_ranks = compute_activity_ranks(activity_events ,group_by='alg', on='perf')
+        self.activity_ranks = compute_activity_ranks(self.reverse_maps.activities_map ,group_by='alg', on='perf')
         
-        for activity, df in activity_events.items():
-            avg_perf = df['perf'].mean()
-            avg_flops = df['flops'].mean()
-            nvariants = df['alg'].nunique()
+        for activity, df in self.reverse_maps.activities_map.items():
+            mean_perf = df['perf'].mean()
+            mean_flops = df['flops'].mean()
             
-            if nvariants == self.total_variants:
-                rank_score = 0
-            else:  
-                variants = df['alg'].unique().tolist()
-                m1 = 0
-                for variant in variants:
-                    m1 += self.alg_ranks['m1'][variant]  
-                m1 /= nvariants
-                rank_score = m1
-                
+            nvariants = df['alg'].nunique()
             nranks = self.activity_ranks[activity]['nranks']
              
             stats.append({
                 'activity': activity,
-                'avg_perf': avg_perf,
-                'avg_flops': avg_flops,
+                'mean_perf': mean_perf,
+                'mean_flops': mean_flops,
                 'nvariants': nvariants,
-                'rank_score': rank_score,
+                'rank_score':  self.activity_rank_score[activity],
                 'nranks': nranks,
             })
             
-        stats_df = pd.DataFrame(stats)
-        return stats_df
+            if nvariants == self.total_variants:
+                label_str = (
+                    f"{activity} ({nvariants}/{self.total_variants})\n"
+                    f"Num. Ranks:  {nranks}\n"            
+                    f"Mean. FLOPs: {mean_flops:.2e}\n"
+                    f"Mean. Perf: {mean_perf:.2f} F/ns"
+                )
+            else:   
+                label_str = (
+                    f"{activity} ({nvariants}/{self.total_variants})\n"
+                    f"Rank score: {self.activity_rank_score[activity]:.1f}\n"
+                    f"Num. Ranks:  {nranks}\n"            
+                    f"Mean. FLOPs: {mean_flops:.2e}\n"
+                    f"Mean. Perf: {mean_perf:.2f} F/ns"
+                )
+            self.activity_label[activity] = label_str          
+            
+        self.activities_stats = pd.DataFrame(stats)
         
-    def _format_label_str(self, row):
-       #label_str = f"{row['activity']} ({row['nvariants']}/{self.nvariants})\nAvg. FLOPs: {row['avg_flops']:.2e}\nAvg. Perf: {row['avg_perf']:.2f} FLOPs/ns\nnPR:  {self.ranks[row['activity']]['rank_str']}"
-       
-       rank_score = f"Rank score: {row['rank_score']:.1f}\n" 
-       if row['nvariants'] == self.total_variants:
-           rank_score = "" 
-           
-       
-       label_str = (
-            f"{row['activity']} ({row['nvariants']}/{self.total_variants})\n"
-            f"{rank_score}"
-            f"Num. Ranks:  {row['nranks']}\n"            
-            f"Avg. FLOPs: {row['avg_flops']:.2e}\n"
-            f"Avg. Perf: {row['avg_perf']:.2f} F/ns"
-        )
-       return label_str 
+
+    def create_style(self):
+        
+        self._compute_activities_stats() 
+              
+        max_rank_score = max(self.activity_rank_score.values())    
+        for node in self.dfg.nodes:
+            if not node == '__START__' and not node == '__END__':
+                self.activity_color[node] = self._get_activity_color(self.activity_rank_score[node], 0.0, max_rank_score)
+        
+
+        max_rank_score = max(self.edge_rank_score.values())                
+        for edge in self.dfg.edges:
+            self.edge_color[edge] = self._get_edge_color(self.edge_rank_score[edge], 0.0, max_rank_score)
+            self.edge_penwidth[edge] = 1.0
+            self.edge_label[edge] = f'{self.edge_rank_score[edge]:.1f}'
 
        
         

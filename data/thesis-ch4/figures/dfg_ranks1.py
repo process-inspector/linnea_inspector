@@ -6,8 +6,9 @@ from process_inspector.activity_log import ActivityLog
 
 from process_inspector.dfg.dfg import DFG
 from process_inspector.dfg.reverse_maps import DFGReverseMaps
+from process_inspector.model_data_utils import concat_meta_data
 
-from linnea_inspector.dfg.statistics_perspective import LinneaDFGStatisticsPerspective
+from linnea_inspector.dfg.ranks_perspective import LinneaDFGRanksPerspective
 
 import sys
 import os
@@ -31,13 +32,13 @@ def test1():
     activity_log = activity_log1 + activity_log2
     dfg = DFG(activity_log)  
     reverse_maps = DFGReverseMaps(activity_log)
+    meta_data = concat_meta_data(meta_data1, meta_data2)
     
-    
-    perspective = LinneaDFGStatisticsPerspective(dfg, reverse_maps)
+    perspective = LinneaDFGRanksPerspective(dfg, reverse_maps, meta_data)    
     perspective.create_style()
     graph = perspective.prepare_digraph(rankdir='TD')
     print(graph)
-    graph.render('dfg3', format='svg', cleanup=True)
+    graph.render('dfg_ranks1', format='svg', cleanup=True)
     
     print("SUCCESS")
 

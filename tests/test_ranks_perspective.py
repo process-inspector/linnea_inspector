@@ -21,7 +21,7 @@ def test1():
     event_data, meta_data1 = prepare(trace_file1)
     event_log = EventLog(event_data, case_key=['alg','iter'], order_key='time', obj_key='alg')
     activity_log1 = ActivityLog(event_log, f_call)    
-    dfg1 = DFG(activity_log1)
+    # dfg1 = DFG(activity_log1)
     
     event_data, meta_data2 = prepare(trace_file2)
     event_log = EventLog(event_data, case_key=['alg','iter'], order_key='time', obj_key='alg')

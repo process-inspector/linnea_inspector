@@ -54,9 +54,24 @@ class LinneaDFGRanksPerspective(DFGRanksPerspective):
         self.activities_stats = pd.DataFrame(stats)
         
 
+    def _compute_edge_stats(self):
+        for edge, df in self.reverse_maps.edges_map.items():
+            _obj_key ='alg'
+            if edge[0] == '__START__':
+                _obj_key = f'next_{_obj_key}' 
+                
+            nvariants = df[_obj_key].nunique()
+            
+            if nvariants == self.total_variants:
+                label_str = ""
+            else:
+                label_str = f'{self.edge_rank_score[edge]:.1f}'
+            self.edge_label[edge] = label_str
+            
     def create_style(self):
         
-        self._compute_activities_stats() 
+        self._compute_activities_stats()
+        self._compute_edge_stats() 
               
         max_rank_score = max(self.activity_rank_score.values())    
         for node in self.dfg.nodes:
@@ -68,7 +83,7 @@ class LinneaDFGRanksPerspective(DFGRanksPerspective):
         for edge in self.dfg.edges:
             self.edge_color[edge] = self._get_edge_color(self.edge_rank_score[edge], 0.0, max_rank_score)
             self.edge_penwidth[edge] = 1.0
-            self.edge_label[edge] = f'{self.edge_rank_score[edge]:.1f}'
+        
 
        
         

@@ -8,6 +8,7 @@ import pandas as pd
 from partial_ranker import MeasurementsVisualizer
 from partial_ranker import QuantileComparer, PartialRanker, Method
 import os
+import numpy as np
 
 def bp_algs(data_dir, activity):
     trace_dir = "../50algorithms_1000_100/Julia/experimentsKEB/traces/"
@@ -29,7 +30,8 @@ def bp_algs(data_dir, activity):
     
     df_ = reverse_maps.activities_map[activity]
     df_ = df_[(df_['alg'] == 'algorithm1') | (df_['alg'] == 'algorithm15')]
-    measurements = df_.groupby('alg')['duration'].apply(lambda x: [float(v) for v in x if pd.notna(v)]).to_dict()
+    df_['perf'] = np.where(df_['duration'] ==0 , np.nan, df_['flops'] / df_['duration'])
+    measurements = df_.groupby('alg')['perf'].apply(lambda x: [float(v) for v in x if pd.notna(v)]).to_dict()
     
     
     cm = QuantileComparer(measurements)
@@ -48,7 +50,7 @@ def bp_algs(data_dir, activity):
     ranks_m3 = pr.get_ranks()
     
     mv = MeasurementsVisualizer(measurements)
-    fig = mv.show_measurements_boxplots(obj_list=algs_seq, scale=1.2, unit='perf (FLOPS/ns)')
+    fig = mv.show_measurements_boxplots(obj_list=algs_seq, scale=1.2, unit=f'{activity} perf (FLOPS/ns)')
     fig.savefig(f'bp_{activity}.pdf', dpi=300, bbox_inches="tight")
     
     print(f"{len(ranks_m1)}-{len(ranks_m2)}-{len(ranks_m3)}")

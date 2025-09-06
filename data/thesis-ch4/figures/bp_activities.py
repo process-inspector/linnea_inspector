@@ -50,7 +50,8 @@ def bp_algs(data_dir, activity):
     ranks_m3 = pr.get_ranks()
     
     mv = MeasurementsVisualizer(measurements)
-    fig = mv.show_measurements_boxplots(obj_list=algs_seq, scale=1.2, unit=f'{activity} perf (FLOPS/ns)')
+    # fig = mv.show_measurements_boxplots(obj_list=algs_seq, scale=1.2, unit=f'{activity} perf (FLOPS/ns)')
+    fig = mv.show_measurements_boxplots(obj_list=['algorithm1', 'algorithm15'], scale=1.2, unit=f'{activity} perf (FLOPS/ns)')
     fig.savefig(f'bp_{activity}.pdf', dpi=300, bbox_inches="tight")
     
     print(f"{len(ranks_m1)}-{len(ranks_m2)}-{len(ranks_m3)}")

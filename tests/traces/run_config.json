@@ -1,0 +1,11 @@
+{
+  "language": "julia",
+  "expr": "GLS:XX",
+  "prob_size": [1000, 1000],
+  "nthreads": 24,
+  "cluster_name": "kebnekaise",
+  "aarch": "x86",
+  "alg_codes_path": "/path/to/algorithm/codes",
+  "batch": 1,
+  "niter": 10
+}

@@ -3,7 +3,7 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 def test_data_processor_with_config():
-    log_dir = "tests/traces"
+    log_dir = "tests/traces/b0"
     processor = LogsProcessor(log_dir=log_dir, parse_run_config=True)
     
     processor.process()
@@ -15,7 +15,7 @@ def test_data_processor_with_config():
     print("SUCCESS")
     
 def test_add_cols_from_config():
-    log_dir = "tests/traces"
+    log_dir = "tests/traces/b0"
     processor = LogsProcessor(log_dir=log_dir, parse_run_config=True)
     
     processor.process()

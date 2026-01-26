@@ -8,7 +8,7 @@ import os
 
 
 def test():
-    log_dir = "tests/traces"
+    log_dir = "tests/traces/b0"
     processor = LogsProcessor(log_dir=log_dir, parse_run_config=True, sep=';')
     
     processor.process()

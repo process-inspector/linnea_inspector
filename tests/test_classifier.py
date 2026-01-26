@@ -5,7 +5,7 @@ import os
 def test1():
     # Example test (from root directory):
     
-    trace_file = "tests/traces/algorithm0.traces"
+    trace_file = "tests/traces/b0/algorithm0.traces"
     event_data, meta_data = prepare(trace_file)
     
     event_data['el:activity'] = event_data.apply(lambda row: f_call(row), axis=1)

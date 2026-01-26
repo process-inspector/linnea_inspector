@@ -1,0 +1,12 @@
+{
+  "language": "julia",
+  "expr": "GLS_XX",
+  "prob_size": [1000, 1000],
+  "nthreads": 24,
+  "cluster_name": "kebnekaise",
+  "aarch": "x86",
+  "alg_codes_path": "tests/algorithms",
+  "batch_id": 1,
+  "niter": 10,
+  "timestamp": "2024-06-15_12-00-00"
+}

@@ -1,4 +1,5 @@
 numpy
 pandas
+h5py
 process_inspector @ git+https://github.com/process-inspector/process_inspector.git
 

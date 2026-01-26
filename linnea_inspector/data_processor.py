@@ -1,3 +1,15 @@
+# Linnea Inspector
+#
+# Copyright (c) 2021-2025, High-Performance and Automatic Computing group
+# at RWTH Aachen University and Umeå University.
+# All rights reserved.
+#
+# Licensed under the BSD 3-Clause License.
+# See LICENSE file in the project root for full license information.
+#
+# Contributors:
+# - Aravind Sankaran
+
 import pandas as pd
 import os
 import numpy as np
@@ -40,7 +52,8 @@ class LogsProcessor:
                 self.run_config['cluster_name'] = run_config['cluster_name']
                 self.run_config['aarch'] = run_config['aarch']
                 self.run_config['prob_size'] = run_config['prob_size']
-                self.run_config['batch'] = run_config['batch']
+                self.run_config['batch_id'] = run_config['batch_id']
+                self.run_config['timestamp'] = run_config['timestamp']
                 self.run_config['niter'] = run_config['niter']
                 self.run_config['alg_codes_path'] = run_config['alg_codes_path']
             except KeyError as e:

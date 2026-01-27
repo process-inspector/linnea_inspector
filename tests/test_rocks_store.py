@@ -37,7 +37,14 @@ def test_read():
     print(df)
     
     confs = rs_reader.get_confs(prob_size="[1000, 1000]")
-    print(confs)    
+    # confs = rs_reader.get_confs(prob_size="[1000, 10000]")
+    # confs = rs_reader.get_confs()
+    
+    print(confs)
+    
+    if not confs:
+        print("No configurations found.")
+        return    
     
     case_md = rs_reader.get_case_md(confs, add_objs_from_config=['cluster_name', 'prob_size'])
     al = rs_reader.get_activity_log(confs, add_objs_from_config=['cluster_name', 'prob_size'])

@@ -147,6 +147,12 @@ class RSWriter:
             for alg_name, gen_steps in alg_generation_steps.items():
                 gen_steps_key = f"/generation_steps/{prob_size}/{alg_name}"
                 store.put_string(gen_steps_key, gen_steps)
+                
+    def write_dfg_report(self, config, class_name, dfg, context):
+        # db_path = get_db_path, reports
+        # store dfg under /dfg_reports/class_name/n_threads/prob_size/dfg
+        # store context under /dfg_reports/class_name/n_threads/prob_size/context
+        pass
         
         
         
@@ -174,6 +180,10 @@ class RSReader:
         self.force_open = force_open
         
     def get_confs(self, **conditions):
+        
+        if not conditions:
+            return self.run_configs.to_dict(orient='records')
+        
         mask = True
         df = self.run_configs
         for col, val in conditions.items():
@@ -181,6 +191,7 @@ class RSReader:
                 mask &= df[col].isin(val)
             else:
                 mask &= (df[col] == val)
+        
                 
         return df[mask].to_dict(orient='records')
         
@@ -269,7 +280,7 @@ class RSReader:
         
         if not c_event_log:
             logger.warning(f"No activity logs found for the given configurations.")
-            return None
+            return ActivityLog({}, {})
                     
         al = ActivityLog()
         al.restore(c_event_log, language_log)
@@ -295,6 +306,12 @@ class RSReader:
                 return None, None
             
         return alg_code, gen_steps
+    
+    def get_dfg_report(self, config, class_name):
+        # db_path = get_db_path, reports
+        # retrieve dfg under /dfg_reports/class_name/n_threads/prob_size/dfg
+        # retrieve context under /dfg_reports/class_name/n_threads/prob_size/context
+        pass
         
     
     

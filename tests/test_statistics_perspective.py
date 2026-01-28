@@ -1,63 +1,61 @@
-from linnea_inspector.event_data  import prepare
-from linnea_inspector.classifiers.f_call import f_call
+from linnea_inspector.data_processor import LogsProcessor
+from linnea_inspector.rocks_store import RSReader
 
-from process_inspector.event_log import EventLog
 from process_inspector.activity_log import ActivityLog
-
+from linnea_inspector.classifiers.f_call import f_call
 from process_inspector.dfg.dfg import DFG
+
 from process_inspector.dfg.reverse_maps import DFGReverseMaps
+from linnea_inspector.dfg.statistics_perspective import DFGStatisticsPerspective
 
-from linnea_inspector.dfg.statistics_perspective import LinneaDFGStatisticsPerspective
-
-import sys
 import os
 
-def test2():
-    trace_file1 = "tests/traces/algorithm0.traces"
-    trace_file2 = "tests/traces/algorithm10.traces"
+def test_lp(log_dir):
     
-    event_data, meta_data = prepare(trace_file1)
-    event_log = EventLog(event_data, case_key=['alg','iter'], order_key='time', obj_key='alg')
-    activity_log1 = ActivityLog(event_log, f_call)    
-    dfg1 = DFG(activity_log1)
+    processor = LogsProcessor(log_dir=log_dir, parse_run_config=True, sep=';')   
+    processor.process()
     
-    event_data, meta_data = prepare(trace_file2)
-    event_log = EventLog(event_data, case_key=['alg','iter'], order_key='time', obj_key='alg')
-    activity_log2 = ActivityLog(event_log, f_call)
     
-    activity_log = activity_log1 + activity_log2
-        
+    activity_log = ActivityLog(processor.event_log, f_call) 
+    
     dfg = DFG(activity_log)
-    reverse_maps = DFGReverseMaps(activity_log)
+    reverse_map = DFGReverseMaps(activity_log, next_attrs=['alg'])
     
+    perspective = DFGStatisticsPerspective(dfg, reverse_map, obj_key='alg')
     
-    perspective = LinneaDFGStatisticsPerspective(dfg, reverse_maps)
     perspective.create_style()
     graph = perspective.prepare_digraph(rankdir='TD')
     print(graph)
-    graph.render(os.path.join('tests/dfgs', 'dfg_stats2'), format='svg', cleanup=True)
+    graph.render(os.path.join('tests/dfgs/', 'dfg_stats_lp'), format='svg', cleanup=True)
     print("SUCCESS")
 
-def test1():
     
-    trace_file = "tests/traces/algorithm0.traces"
-    event_data, meta_data = prepare(trace_file)
-    event_log = EventLog(event_data, case_key=['alg','iter'], order_key='time', obj_key='alg')
+def test_rs(store_path):
+    rs_reader = RSReader(store_path)
+    confs = rs_reader.get_confs(
+        expr="GLS_XX",
+        prob_size="[1000, 1000]")
     
-    activity_log = ActivityLog(event_log, f_call)    
+    if not confs:
+        print("No configurations found.")
+        return
+    
+    case_md = rs_reader.get_case_md(confs, add_objs_from_config=['expr', 'prob_size'])
+    
+    activity_log = rs_reader.get_activity_log(confs, add_objs_from_config=['expr', 'prob_size'])
     dfg = DFG(activity_log)
-    reverse_maps = DFGReverseMaps(activity_log)
-    
-    perspective = LinneaDFGStatisticsPerspective(dfg, reverse_maps)
+    reverse_map = DFGReverseMaps(activity_log, next_attrs=['alg'])
+
+    perspective = DFGStatisticsPerspective(dfg, reverse_map, obj_key='alg')
     perspective.create_style()
     graph = perspective.prepare_digraph(rankdir='TD')
     print(graph)
-    graph.render(os.path.join('tests/dfgs', 'dfg_stats1'), format='svg', cleanup=True)
+    graph.render(os.path.join('tests/dfgs/', 'dfg_stats_rs'), format='svg', cleanup=True)
     print("SUCCESS")
-
-
+    
 if __name__ == "__main__":
+    log_dir = "tests/traces/b0"
+    test_lp(log_dir)
     
-    test1()
-    test2()
-    
+    store_path = ["tests/store/test.rs",]
+    test_rs(store_path)

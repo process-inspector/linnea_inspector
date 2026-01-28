@@ -1,33 +1,54 @@
 import pandas as pd
-from process_inspector.dfg.statistics_perspective import DFGStatisticsPerspective
+from process_inspector.dfg.base_perspective import DFGBasePerspective
 import numpy as np
-# from .statistics import compute_perf
+from .dfg_context import DFGContext
 
-class LinneaDFGStatisticsPerspective(DFGStatisticsPerspective):
-    def __init__(self,dfg, reverse_maps):    
-        super().__init__(dfg, reverse_maps)
-        self.color_by = "mean_perf"
+class DFGStatisticsPerspective(DFGBasePerspective):
+    def __init__(self,dfg, reverse_maps, obj_key="alg"):    
+        super().__init__(dfg)
+        
+        self.color_by = "perf_mean"
+        self.context = DFGContext(reverse_maps, None, obj_key=obj_key, compute_ranks=False)
         
         
-    def _compute_activities_stats(self, reverse_maps):
-        stats = []
-        for activity, df in reverse_maps.activities_map.items():
-            df['perf'] = np.where(df['duration'] ==0 , np.nan, df['flops'] / df['duration'])
-            mean_perf = df['perf'].mean()
-            mean_flops = df['flops'].mean()
+    def create_style(self):
+        
+        for record in self.context.relation_data.records:
+            edge = record['relation']
+            self.edge_color[edge] = "#000000"
+            self.edge_penwidth[edge] = 1.0
+            self.edge_label[edge] = f"{record['obj_count']}"
             
-            stats.append({
-                'activity': activity,
-                'mean_perf': mean_perf,
-                'mean_flops': mean_flops,
-            })
+        sum_ = sum(record[self.color_by] for record in self.context.activity_data.records)
+        for record in self.context.activity_data.records:
+            activity = record['activity']
             
-        stats_df = pd.DataFrame(stats)
-        return stats_df
+            label = f"{activity}\n"
+            label += f"Mean. FLOPs: {record['flops_mean']:.2e}\n"
+            label += f"Mean. Perf: {record['perf_mean']:.2f} F/ns"
+            
+            self.activity_label[activity] = label
+            color_score = record[self.color_by]/sum_ if sum_ > 0 else 0.0
+            self.activity_color[activity] = self._get_activity_color(color_score, 0.0, 1.0)
+            
+            
         
-    def _format_activity_label_str(self, row):
-       label_str = (f"{row['activity']}\n"
-                    f"Mean. FLOPs: {row['mean_flops']:.2e}\n"
-                    f"Mean. Perf: {row['mean_perf']:.2f} FLOPs/ns"
-       )
-       return label_str 
+    def _get_activity_color(self, trans_count, min_trans_count, max_trans_count):
+        """
+        Get color representation based on the transaction count.
+
+        Args:
+            trans_count (float): The transaction count.
+            min_trans_count (float): The minimum transaction count.
+            max_trans_count (float): The maximum transaction count.
+
+        Returns:
+            str: A hexadecimal color code representing the transaction count.
+        """
+        try:
+            trans_base_color = int(255 - 100 * (trans_count - min_trans_count) / (max_trans_count - min_trans_count + 0.00001))
+            trans_base_color_hex = str(hex(trans_base_color))[2:].upper()
+            return "#" + trans_base_color_hex + trans_base_color_hex + "FF"
+        except ValueError:
+            # this happens if trans_count is NaN or _sum is 0
+            return "#FFFFFF"

@@ -1,88 +1,76 @@
 import pandas as pd
-from process_inspector.dfg.ranks_perspective import DFGRanksPerspective
-from process_inspector.compute_ranks import compute_activity_ranks
+from process_inspector.dfg.base_perspective import DFGBasePerspective
+from .dfg_context import DFGContext
 import numpy as np
-# from .statistics import compute_perf
 
-class LinneaDFGRanksPerspective(DFGRanksPerspective):
-    def __init__(self,dfg, reverse_maps, meta_data):   
-        super().__init__(dfg, reverse_maps, meta_data, obj_key='alg', obj_perf_key='duration')
-        self.activities_stats = None
-        self.activity_ranks = None      
+class DFGRanksPerspective(DFGBasePerspective):
+    def __init__(self,dfg, reverse_maps, object_context_data, obj_key="alg"):   
+        super().__init__(dfg)
         
-    def _compute_activities_stats(self):
-        stats = []
+        self.context = DFGContext(reverse_maps, object_context_data, obj_key=obj_key, compute_ranks=True)
         
-        for activity, df in self.reverse_maps.activities_map.items():
-            df['perf'] = np.where(df['duration'] ==0 , np.nan, df['flops'] / df['duration'])
-                    
-        self.activity_ranks = compute_activity_ranks(self.reverse_maps.activities_map ,group_by='alg', on='perf')
-        
-        for activity, df in self.reverse_maps.activities_map.items():
-            mean_perf = df['perf'].mean()
-            mean_flops = df['flops'].mean()
-            
-            nvariants = df['alg'].nunique()
-            nranks = self.activity_ranks[activity]['nranks']
-             
-            stats.append({
-                'activity': activity,
-                'mean_perf': mean_perf,
-                'mean_flops': mean_flops,
-                'nvariants': nvariants,
-                'rank_score':  self.activity_rank_score[activity],
-                'nranks': nranks,
-            })
-            
-            if nvariants == self.total_variants:
-                label_str = (
-                    f"{activity} ({nvariants}/{self.total_variants})\n"
-                    f"Num. Ranks:  {nranks}\n"            
-                    f"Mean. FLOPs: {mean_flops:.2e}\n"
-                    f"Mean. Perf: {mean_perf:.2f} F/ns"
-                )
-            else:   
-                label_str = (
-                    f"{activity} ({nvariants}/{self.total_variants})\n"
-                    f"Rank score: {self.activity_rank_score[activity]:.1f}\n"
-                    f"Num. Ranks:  {nranks}\n"            
-                    f"Mean. FLOPs: {mean_flops:.2e}\n"
-                    f"Mean. Perf: {mean_perf:.2f} F/ns"
-                )
-            self.activity_label[activity] = label_str          
-            
-        self.activities_stats = pd.DataFrame(stats)
-        
-
-    def _compute_edge_stats(self):
-        for edge, df in self.reverse_maps.edges_map.items():
-            _obj_key ='alg'
-            if edge[0] == '__START__':
-                _obj_key = f'next_{_obj_key}' 
-                
-            nvariants = df[_obj_key].nunique()
-            
-            if nvariants == self.total_variants:
-                label_str = ""
-            else:
-                label_str = f'{self.edge_rank_score[edge]:.1f}'
-            self.edge_label[edge] = label_str
-            
+    
     def create_style(self):
+        # find max rank score for activities
+        max_activity_rank_score = max(record['rank_score'] for record in self.context.activity_data.records)    
+        max_edge_rank_score = max(record['rank_score'] for record in self.context.relation_data.records)
         
-        self._compute_activities_stats()
-        self._compute_edge_stats() 
-              
-        max_rank_score = max(self.activity_rank_score.values())    
-        for node in self.dfg.nodes:
-            if not node == '__START__' and not node == '__END__':
-                self.activity_color[node] = self._get_activity_color(self.activity_rank_score[node], 0.0, max_rank_score)
-        
-
-        max_rank_score = max(self.edge_rank_score.values())                
-        for edge in self.dfg.edges:
-            self.edge_color[edge] = self._get_edge_color(self.edge_rank_score[edge], 0.0, max_rank_score)
+        for record in self.context.relation_data.records:
+            edge = record['relation']
+            score = record['rank_score']
+            self.edge_color[edge] = self._get_edge_color(max(0, score), 0.0, max_edge_rank_score)
             self.edge_penwidth[edge] = 1.0
+            
+            if score != -1.0:
+                self.edge_label[edge] = f"{score:.1f}"
+            else:
+                self.edge_label[edge] = ""
+                
+        for record in self.context.activity_data.records:
+            num_objs = len(self.context.activity_data.obj_records[record['activity']])
+            score = record['rank_score']
+            
+            label = f"{record['activity']} ({num_objs}/{self.context.total_objs})\n"
+            if score != -1.0:
+                label += f"Rank Score: {score:.1f}\n"
+            label += f"Mean. FLOPs: {record['flops_mean']:.2e}\n"
+            label += f"Mean. Perf: {record['perf_mean']:.2f} F/ns"
+            
+            self.activity_label[record['activity']] = label
+            self.activity_color[record['activity']] = self._get_activity_color(max(0, record['rank_score']), 0.0, max_activity_rank_score)
+             
+                 
+    def _get_activity_color(self, trans_count, min_trans_count, max_trans_count):
+        """
+        Get color representation based on the transaction count.
+
+        Args:
+            trans_count (float): The transaction count.
+            min_trans_count (float): The minimum transaction count.
+            max_trans_count (float): The maximum transaction count.
+
+        Returns:
+            str: A hexadecimal color code representing the transaction count.
+        """
+        try:
+            trans_base_color = int(255 - 100 * (trans_count - min_trans_count) / (max_trans_count - min_trans_count + 0.00001))
+            trans_base_color_hex = str(hex(trans_base_color))[2:].upper()
+            return "#FF" + trans_base_color_hex + trans_base_color_hex
+        except ValueError:
+            # this happens if trans_count is NaN or _sum is 0
+            return "#FFFFFF"
+        
+        
+    def _get_edge_color(self, trans_count, min_trans_count, max_trans_count):
+        try:
+            trans_base_color = int(255 * (trans_count - min_trans_count) / (max_trans_count - min_trans_count + 1e-9))
+            trans_base_color_hex = str(hex(trans_base_color))[2:].upper().zfill(2)
+            return "#" + trans_base_color_hex + "0000"
+        except ValueError:
+            # this happens if trans_count is NaN or _sum is 0
+            return "#000000"
+
+
         
 
        

@@ -1,39 +1,64 @@
-from linnea_inspector.event_data  import prepare
-from linnea_inspector.classifiers.f_call import f_call
+from linnea_inspector.data_processor import LogsProcessor
+from linnea_inspector.rocks_store import RSReader
 
-from process_inspector.event_log import EventLog
 from process_inspector.activity_log import ActivityLog
-
+from linnea_inspector.classifiers.f_call import f_call
 from process_inspector.dfg.dfg import DFG
-from linnea_inspector.dfg.difference_perspective import LinneaDFGDifferencePerspective
 
-import sys
+from process_inspector.dfg.difference_perspective import DFGDifferencePerspective
+
 import os
 
-def test():
-    # Example test (from root directory):
+
+def test_lp(log_dir):
     
-    trace_file1 = "tests/traces/algorithm0.traces"
-    trace_file2 = "tests/traces/algorithm45.traces"
+    processor = LogsProcessor(log_dir=log_dir, parse_run_config=True, sep=';')   
+    processor.process()
     
-    event_data, meta_data = prepare(trace_file1)
-    event_log = EventLog(event_data, case_key=['alg','iter'], order_key='time', obj_key='alg')
-    activity_log = ActivityLog(event_log, f_call)    
-    dfg1 = DFG(activity_log)
+    activity_log = ActivityLog(processor.event_log, f_call)
+    al_1 = activity_log.apply_filter(lambda event: event['alg'] == 'algorithm0')
+    dfg_1 = DFG(al_1)
     
-    event_data, meta_data = prepare(trace_file2)
-    event_log = EventLog(event_data, case_key=['alg','iter'], order_key='time', obj_key='alg')
-    activity_log = ActivityLog(event_log, f_call)    
-    dfg2 = DFG(activity_log)
+    al_2 = activity_log.apply_filter(lambda event: event['alg'] == 'algorithm10')
+    dfg_2 = DFG(al_2)
     
-    perspective = LinneaDFGDifferencePerspective(dfg1, dfg2)
+    
+    perspective = DFGDifferencePerspective(dfg_1, dfg_2)
+    
     perspective.create_style()
     graph = perspective.prepare_digraph(rankdir='TD')
     print(graph)
-    graph.render(os.path.join('tests/dfgs', 'dfg_diff'), format='svg', cleanup=True)
+    graph.render(os.path.join('tests/dfgs/', 'dfg_diff_lp'), format='svg', cleanup=True)
     print("SUCCESS")
 
+def test_rs(store_path):
+    rs_reader = RSReader(store_path)
+    confs = rs_reader.get_confs(
+        expr="GLS_XX",
+        prob_size="[1000, 1000]")
+    
+    if not confs:
+        print("No configurations found.")
+        return
+    
+    
+    activity_log = rs_reader.get_activity_log(confs, add_objs_from_config=['expr', 'prob_size'])
+    
+    al_1 = activity_log.apply_filter(lambda event: event['alg'] == 'algorithm0')
+    dfg_1 = DFG(al_1)
+    al_2 = activity_log.apply_filter(lambda event: event['alg'] == 'algorithm10')
+    dfg_2 = DFG(al_2)
+    
+    perspective = DFGDifferencePerspective(dfg_1, dfg_2)
+    perspective.create_style()
+    graph = perspective.prepare_digraph(rankdir='TD')
+    print(graph)
+    graph.render(os.path.join('tests/dfgs/', 'dfg_diff_rs'), format='svg', cleanup=True)
+    print("SUCCESS")
+    
 if __name__ == "__main__":
-    test()
+    log_dir = "tests/traces/b0"
+    test_lp(log_dir)
     
-    
+    store_path = ["tests/store/test.rs",]
+    test_rs(store_path)

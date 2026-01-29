@@ -3,8 +3,8 @@ from linnea_inspector.rocks_store import RSReader
 
 from process_inspector.activity_log import ActivityLog
 from linnea_inspector.classifiers.f_call import f_call
-from process_inspector.dfg.dfg import DFG
 
+from linnea_inspector.dfg.context import DFGContext
 from process_inspector.dfg.difference_perspective import DFGDifferencePerspective
 
 import os
@@ -17,13 +17,16 @@ def test_lp(log_dir):
     
     activity_log = ActivityLog(processor.event_log, f_call)
     al_1 = activity_log.apply_filter(lambda event: event['alg'] == 'algorithm0')
-    dfg_1 = DFG(al_1)
+    context1 = DFGContext(al_1, None, obj_key='alg', compute_ranks=False)
     
     al_2 = activity_log.apply_filter(lambda event: event['alg'] == 'algorithm10')
-    dfg_2 = DFG(al_2)
+    context2 = DFGContext(al_2, None, obj_key='alg', compute_ranks=False)
     
     
-    perspective = DFGDifferencePerspective(dfg_1, dfg_2)
+    perspective = DFGDifferencePerspective(context1.activity_data.activities,
+                                           context1.relation_data.relations,
+                                           context2.activity_data.activities,
+                                           context2.relation_data.relations)
     
     perspective.create_style()
     graph = perspective.prepare_digraph(rankdir='TD')
@@ -45,11 +48,15 @@ def test_rs(store_path):
     activity_log = rs_reader.get_activity_log(confs, add_objs_from_config=['expr', 'prob_size'])
     
     al_1 = activity_log.apply_filter(lambda event: event['alg'] == 'algorithm0')
-    dfg_1 = DFG(al_1)
-    al_2 = activity_log.apply_filter(lambda event: event['alg'] == 'algorithm10')
-    dfg_2 = DFG(al_2)
+    context1 = DFGContext(al_1, None, obj_key='alg', compute_ranks=False)
     
-    perspective = DFGDifferencePerspective(dfg_1, dfg_2)
+    al_2 = activity_log.apply_filter(lambda event: event['alg'] == 'algorithm10')
+    context2 = DFGContext(al_2, None, obj_key='alg', compute_ranks=False)
+    
+    perspective = DFGDifferencePerspective(context1.activity_data.activities,
+                                           context1.relation_data.relations,
+                                           context2.activity_data.activities,
+                                           context2.relation_data.relations)
     perspective.create_style()
     graph = perspective.prepare_digraph(rankdir='TD')
     print(graph)

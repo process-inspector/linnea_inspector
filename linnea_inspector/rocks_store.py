@@ -1,6 +1,6 @@
 # Linnea Inspector
 #
-# Copyright (c) 2021-2025, High-Performance and Automatic Computing group
+# Copyright (c) 2021-2026, High-Performance and Automatic Computing group
 # at RWTH Aachen University and Umeå University.
 # All rights reserved.
 #
@@ -148,7 +148,8 @@ class RSWriter:
                 gen_steps_key = f"/generation_steps/{prob_size}/{alg_name}"
                 store.put_string(gen_steps_key, gen_steps)
                 
-    def write_dfg_report(self, config, class_name, dfg, context):
+    def write_facts_report(self, config, class_name, model_type, object_context, model_context, model_dot_str, report=""):
+        
         # db_path = get_db_path, reports
         # store dfg under /dfg_reports/class_name/n_threads/prob_size/dfg
         # store context under /dfg_reports/class_name/n_threads/prob_size/context

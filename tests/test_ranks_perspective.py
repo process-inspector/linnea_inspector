@@ -3,10 +3,9 @@ from linnea_inspector.rocks_store import RSReader
 
 from process_inspector.activity_log import ActivityLog
 from linnea_inspector.classifiers.f_call import f_call
-from process_inspector.dfg.dfg import DFG
 
-from process_inspector.dfg.reverse_maps import DFGReverseMaps
 from linnea_inspector.object_context import ObjectContext
+from linnea_inspector.dfg.context import DFGContext
 from linnea_inspector.dfg.ranks_perspective import DFGRanksPerspective
 
 import os
@@ -20,13 +19,14 @@ def test_lp(log_dir):
     
     activity_log = ActivityLog(processor.event_log, f_call) 
     
-    dfg = DFG(activity_log)
-    reverse_map = DFGReverseMaps(activity_log, next_attrs=['alg'])
+    dfg_context = DFGContext(activity_log, obj_context.data, obj_key='alg', compute_ranks=True)
     
-    perspective = DFGRanksPerspective(dfg, reverse_map, obj_context, obj_key='alg')
+    dfg_perspective = DFGRanksPerspective(dfg_context.activity_data, 
+                                          dfg_context.relation_data,
+                                          obj_context.data)
     
-    perspective.create_style()
-    graph = perspective.prepare_digraph(rankdir='TD')
+    dfg_perspective.create_style()
+    graph = dfg_perspective.prepare_digraph(rankdir='TD')
     print(graph)
     graph.render(os.path.join('tests/dfgs/', 'dfg_ranks_lp'), format='svg', cleanup=True)
     print("SUCCESS")
@@ -46,13 +46,17 @@ def test_rs(store_path):
     obj_context = ObjectContext(case_md, obj_key='alg', compute_ranks=True)
     
     activity_log = rs_reader.get_activity_log(confs, add_objs_from_config=['expr', 'prob_size'])
-    dfg = DFG(activity_log)
-    reverse_map = DFGReverseMaps(activity_log, next_attrs=['alg'])
 
-    perspective = DFGRanksPerspective(dfg, reverse_map, obj_context, obj_key='alg')
-    perspective.create_style()
-    graph = perspective.prepare_digraph(rankdir='TD')
+    dfg_context = DFGContext(activity_log, obj_context.data, obj_key='alg', compute_ranks=True)
+    
+    dfg_perspective = DFGRanksPerspective(dfg_context.activity_data, 
+                                          dfg_context.relation_data,
+                                          obj_context.data)
+    
+    dfg_perspective.create_style()
+    graph = dfg_perspective.prepare_digraph(rankdir='TD')
     print(graph)
+    
     graph.render(os.path.join('tests/dfgs/', 'dfg_ranks_rs'), format='svg', cleanup=True)
     print("SUCCESS")
     

@@ -3,9 +3,8 @@ from linnea_inspector.rocks_store import RSReader
 
 from process_inspector.activity_log import ActivityLog
 from linnea_inspector.classifiers.f_call import f_call
-from process_inspector.dfg.dfg import DFG
 
-from process_inspector.dfg.reverse_maps import DFGReverseMaps
+from linnea_inspector.dfg.context import DFGContext
 from linnea_inspector.dfg.statistics_perspective import DFGStatisticsPerspective
 
 import os
@@ -18,14 +17,14 @@ def test_lp(log_dir):
     
     activity_log = ActivityLog(processor.event_log, f_call) 
     
-    dfg = DFG(activity_log)
-    reverse_map = DFGReverseMaps(activity_log, next_attrs=['alg'])
+    dfg_context = DFGContext(activity_log, None, obj_key='alg', compute_ranks=False)
     
-    perspective = DFGStatisticsPerspective(dfg, reverse_map, obj_key='alg')
+    dfg_perspective = DFGStatisticsPerspective(dfg_context.activity_data, dfg_context.relation_data, color_by="perf_mean")
     
-    perspective.create_style()
-    graph = perspective.prepare_digraph(rankdir='TD')
+    dfg_perspective.create_style()
+    graph = dfg_perspective.prepare_digraph(rankdir='TD')
     print(graph)
+    
     graph.render(os.path.join('tests/dfgs/', 'dfg_stats_lp'), format='svg', cleanup=True)
     print("SUCCESS")
 
@@ -43,12 +42,13 @@ def test_rs(store_path):
     case_md = rs_reader.get_case_md(confs, add_objs_from_config=['expr', 'prob_size'])
     
     activity_log = rs_reader.get_activity_log(confs, add_objs_from_config=['expr', 'prob_size'])
-    dfg = DFG(activity_log)
-    reverse_map = DFGReverseMaps(activity_log, next_attrs=['alg'])
+    
+    dfg_context = DFGContext(activity_log, None, obj_key='alg', compute_ranks=False)
 
-    perspective = DFGStatisticsPerspective(dfg, reverse_map, obj_key='alg')
-    perspective.create_style()
-    graph = perspective.prepare_digraph(rankdir='TD')
+    dfg_perspective = DFGStatisticsPerspective(dfg_context.activity_data, dfg_context.relation_data, color_by="perf_mean")
+    dfg_perspective.create_style()
+    graph = dfg_perspective.prepare_digraph(rankdir='TD')
+    
     print(graph)
     graph.render(os.path.join('tests/dfgs/', 'dfg_stats_rs'), format='svg', cleanup=True)
     print("SUCCESS")

@@ -1,10 +1,9 @@
 from linnea_inspector.data_processor import LogsProcessor
 from process_inspector.activity_log import ActivityLog
-from process_inspector.dfg.reverse_maps import DFGReverseMaps
 from linnea_inspector.classifiers.f_call import f_call
 from linnea_inspector.rocks_store import RSReader
 
-from linnea_inspector.dfg.dfg_context import DFGContext
+from linnea_inspector.dfg.context import DFGContext
 from linnea_inspector.object_context import ObjectContext
 
 def test_lp(log_dir):
@@ -15,9 +14,8 @@ def test_lp(log_dir):
     obj_context = ObjectContext(processor.case_md, obj_key='alg', compute_ranks=True)
     
     activity_log = ActivityLog(processor.event_log, f_call) 
-    reverse_map = DFGReverseMaps(activity_log, next_attrs=['alg', 'perf'])
     
-    dfg_context = DFGContext(reverse_map, obj_context, obj_key='alg', compute_ranks=True)
+    dfg_context = DFGContext(activity_log, obj_context.data, obj_key='alg', compute_ranks=True)
 
     print("DFG Context Activity Records:")
     print(dfg_context.activity_data.records)
@@ -44,8 +42,7 @@ def test_rs(store_path):
     obj_context = ObjectContext(case_md, obj_key='alg', compute_ranks=True)
     
     activity_log = rs_reader.get_activity_log(confs, add_objs_from_config=['expr', 'prob_size'])
-    reverse_map = DFGReverseMaps(activity_log, next_attrs=['alg', 'expr', 'prob_size', 'perf'])
-    dfg_context = DFGContext(reverse_map, obj_context, obj_key='alg', compute_ranks=True)
+    dfg_context = DFGContext(activity_log, obj_context.data, obj_key='alg', compute_ranks=True)
     
     print("DFG Context Activity Records:")
     print(dfg_context.activity_data.records)

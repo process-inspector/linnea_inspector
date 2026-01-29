@@ -1,26 +1,28 @@
 import pandas as pd
 from process_inspector.dfg.base_perspective import DFGBasePerspective
 import numpy as np
-from .dfg_context import DFGContext
 
 class DFGStatisticsPerspective(DFGBasePerspective):
-    def __init__(self,dfg, reverse_maps, obj_key="alg"):    
-        super().__init__(dfg)
+    def __init__(self, activity_context_data, relation_context_data, color_by="perf_mean"):   
+        super().__init__(activity_context_data.activities, relation_context_data.relations)
         
-        self.color_by = "perf_mean"
-        self.context = DFGContext(reverse_maps, None, obj_key=obj_key, compute_ranks=False)
+        self.color_by = color_by
+        
+        self.activity_data = activity_context_data
+        self.relation_data = relation_context_data
+        # self.context = DFGContext(reverse_maps, None, obj_key=obj_key, compute_ranks=False)
         
         
     def create_style(self):
         
-        for record in self.context.relation_data.records:
+        for record in self.relation_data.records:
             edge = record['relation']
             self.edge_color[edge] = "#000000"
             self.edge_penwidth[edge] = 1.0
             self.edge_label[edge] = f"{record['obj_count']}"
             
-        sum_ = sum(record[self.color_by] for record in self.context.activity_data.records)
-        for record in self.context.activity_data.records:
+        sum_ = sum(record[self.color_by] for record in self.activity_data.records)
+        for record in self.activity_data.records:
             activity = record['activity']
             
             label = f"{activity}\n"

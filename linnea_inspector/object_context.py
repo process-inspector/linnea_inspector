@@ -1,4 +1,3 @@
-from process_inspector.schemas import ObjectSchema
 from process_inspector.contexts import ObjectContextBase
 
     
@@ -14,11 +13,12 @@ class ObjectContext(ObjectContextBase):
         self.compute_object_stats(case_md)
         
         
-        
     def compute_object_stats(self, case_md):
+        objects = []
         records = []
         bp_data = {}
         for obj, df in case_md.groupby(self.obj_key):
+            objects.append(obj)
             record = {}
             record['obj'] = obj
             record['duration_mean'] = df['duration'].mean()
@@ -32,7 +32,8 @@ class ObjectContext(ObjectContextBase):
             obj_rank, perf_class = self._compute_partial_ranks(bp_data)
             for record in records:
                 record['rank'] = obj_rank[record['obj']]
-                       
+        
+        self.data.objects = set(objects)               
         self.data.records = records
         self.data.bp_data = bp_data
         if self.compute_ranks:

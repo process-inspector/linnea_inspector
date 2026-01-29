@@ -1,21 +1,22 @@
 import pandas as pd
 from process_inspector.dfg.base_perspective import DFGBasePerspective
-from .dfg_context import DFGContext
 import numpy as np
 
 class DFGRanksPerspective(DFGBasePerspective):
-    def __init__(self,dfg, reverse_maps, object_context_data, obj_key="alg"):   
-        super().__init__(dfg)
+    def __init__(self, activity_context_data, relation_context_data, object_context_data):   
+        super().__init__(activity_context_data.activities, relation_context_data.relations)
         
-        self.context = DFGContext(reverse_maps, object_context_data, obj_key=obj_key, compute_ranks=True)
+        self.activity_data = activity_context_data
+        self.relation_data = relation_context_data
+        self.total_objs = len(object_context_data.objects)
         
     
     def create_style(self):
         # find max rank score for activities
-        max_activity_rank_score = max(record['rank_score'] for record in self.context.activity_data.records)    
-        max_edge_rank_score = max(record['rank_score'] for record in self.context.relation_data.records)
+        max_activity_rank_score = max(record['rank_score'] for record in self.activity_data.records)    
+        max_edge_rank_score = max(record['rank_score'] for record in self.relation_data.records)
         
-        for record in self.context.relation_data.records:
+        for record in self.relation_data.records:
             edge = record['relation']
             score = record['rank_score']
             self.edge_color[edge] = self._get_edge_color(max(0, score), 0.0, max_edge_rank_score)
@@ -26,11 +27,11 @@ class DFGRanksPerspective(DFGBasePerspective):
             else:
                 self.edge_label[edge] = ""
                 
-        for record in self.context.activity_data.records:
-            num_objs = len(self.context.activity_data.obj_records[record['activity']])
+        for record in self.activity_data.records:
+            num_objs = len(self.activity_data.obj_records[record['activity']])
             score = record['rank_score']
             
-            label = f"{record['activity']} ({num_objs}/{self.context.total_objs})\n"
+            label = f"{record['activity']} ({num_objs}/{self.total_objs})\n"
             if score != -1.0:
                 label += f"Rank Score: {score:.1f}\n"
             label += f"Mean. FLOPs: {record['flops_mean']:.2e}\n"

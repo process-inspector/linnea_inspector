@@ -1,34 +1,37 @@
 import pandas as pd
-from process_inspector.schemas import ActivitySchema, RelationSchema
 from process_inspector.contexts import PMContextBase
+from process_inspector.dfg.builder import DFGBuilder
 import numpy as np
 
-
-
 class DFGContext(PMContextBase):
-    def __init__(self, reverse_maps, object_context, obj_key="alg", compute_ranks=True):
+    def __init__(self, activity_log, object_context_data, obj_key="alg", compute_ranks=True):
         super().__init__()
         
+        dfg = DFGBuilder(activity_log)
+          
         self.obj_key = obj_key
         self.reduction_group = [obj_key, 'iter']
         
         if compute_ranks:
-            self.total_objs = len(object_context.data.records)     
-            self.obj_rank = object_context.data.rank
+            self.obj_rank = object_context_data.rank
             
         self.compute_ranks = compute_ranks
         
-        self.compute_activity_stats(reverse_maps)
-        self.compute_relation_stats(reverse_maps)
+        self.compute_activity_stats(dfg.node_data)
+        self.compute_relation_stats(dfg.edge_data)
 
                 
-    def compute_activity_stats(self, reverse_maps):
+    def compute_activity_stats(self, node_data):
+        activities = []
         records = []
         obj_records = {}
         obj_bp = {}
         obj_rank = {}
 
-        for activity, df in reverse_maps.activities_map.items():
+        for activity, df in node_data.items():
+            # node_data does not contain __START__ and __END__
+            # otherwise, a check should be added here
+            activities.append(activity) 
             record = {}
             record['activity'] = activity
             record['perf_mean'] = df['perf'].mean()
@@ -65,7 +68,8 @@ class DFGContext(PMContextBase):
             obj_bp[activity] = _obj_bp            
             records.append(record)            
             obj_records[activity] = _obj_records
-               
+        
+        self.activity_data.activities = set(activities)       
         self.activity_data.records = records
         self.activity_data.obj_records = obj_records
         self.activity_data.obj_bp_data = obj_bp
@@ -73,13 +77,15 @@ class DFGContext(PMContextBase):
             self.activity_data.obj_rank = obj_rank
             
     
-    def compute_relation_stats(self, reverse_maps):
+    def compute_relation_stats(self, edge_data):
+        relations = []
         records = []
 
-        for relation, df in reverse_maps.edges_map.items():
+        for relation, df in edge_data.items():
+            relations.append(relation)
             _obj_key = self.obj_key
-            if relation[0] == '__START__':
-                _obj_key = f'next_{self.obj_key}'
+            # if relation[0] == '__START__':
+            #     _obj_key = f'next_{self.obj_key}'
                       
             record = {}
             record['relation'] = relation
@@ -88,6 +94,7 @@ class DFGContext(PMContextBase):
                 record['rank_score'] = self._compute_rank_score(df[_obj_key].unique().tolist(), self.obj_rank)
                 
             records.append(record)
-                
+       
+        self.relation_data.relations = set(relations)         
         self.relation_data.records = records
                 

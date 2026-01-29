@@ -1,5 +1,5 @@
 from process_inspector.activity_log import ActivityLog
-from process_inspector.dfg.dfg import DFG
+from process_inspector.dfg.builder import DFGBuilder
 from linnea_inspector.data_processor import LogsProcessor
 from linnea_inspector.classifiers.f_call import f_call
 from linnea_inspector.rocks_store import RSReader
@@ -10,9 +10,18 @@ def test_lp(log_dir):
     processor.process()
     activity_log = ActivityLog(processor.event_log, f_call)
     
-    dfg = DFG(activity_log)
+    dfg = DFGBuilder(activity_log)
     print(dfg.nodes)
     print(dfg.edges)
+    
+    for node in dfg.node_data:
+        print(dfg.node_data[node].head())
+        break
+    
+    for edge in dfg.edge_data:
+        print(dfg.edge_data[edge].head())
+        break
+        
     print("SUCCESS")
     
 def test_rs(store_path):
@@ -26,14 +35,21 @@ def test_rs(store_path):
         return
     
     al = rs_reader.get_activity_log(confs, add_objs_from_config=['expr', 'prob_size'])
-    dfg = DFG(al)
+    dfg = DFGBuilder(al)
+    
     print(dfg.nodes)
     print(dfg.edges)
+    
+    for node in dfg.node_data:
+        print(dfg.node_data[node].head())
+        break
+    
+    for edge in dfg.edge_data:
+        print(dfg.edge_data[edge].head())
+        break
     print("SUCCESS")
     
-    
-    
- 
+     
 if __name__ == "__main__":
     log_dir = "tests/traces/b0"
     test_lp(log_dir)

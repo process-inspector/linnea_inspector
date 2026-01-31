@@ -69,6 +69,22 @@ def test_read_alg_code():
     
     print(f"Algorithm Code for {alg_name}:\n{code}")
     print(f"Generation Steps for {alg_name}:\n{gen_steps}")
+    
+def test_write_context():
+    store_path = ["tests/store/test.rs",]
+    rs_reader = RSReader(store_path)
+    
+    confs = rs_reader.get_confs(prob_size="[1000, 1000]")
+    
+    case_md = rs_reader.get_case_md(confs)
+    
+    obj_context = ObjectContext(case_md, obj_key='alg', compute_ranks=True)
+    
+    activity_log = rs_reader.get_activity_log(confs)
+
+    dfg_context = DFGContext(activity_log, obj_context.data, obj_key='alg', compute_ranks=True)
+    
+    rs_writer = RSWriter(confs[0], store_path[0])
   
 if __name__ == "__main__":
     test_write("tests/traces/b0")

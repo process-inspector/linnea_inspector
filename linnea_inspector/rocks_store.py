@@ -19,7 +19,7 @@ from process_inspector.activity_log import ActivityLog
 import logging
 logger = logging.getLogger(__name__)
 
-def get_db_path(run_config, store_path, db_folder="inspector"):
+def get_run_db_path(run_config, store_path, db_folder):
     try:
         language = run_config['language']
         expr = run_config['expr']
@@ -32,21 +32,17 @@ def get_db_path(run_config, store_path, db_folder="inspector"):
     return db_path
 
 
+
 class RSWriter:
 
-    def __init__(self, run_config, store_path, lock_timeout=300, force_open=False):
+    def __init__(self, run_config, store_path,  lock_timeout=300, force_open=False):
         
         self.store_path = store_path
         if not os.path.exists(self.store_path):
             os.makedirs(self.store_path, exist_ok=True)
         
-        self.db_path = get_db_path(run_config, store_path)
-        self.alg_db_path = get_db_path(run_config, store_path, db_folder="algorithms")
         self.run_config = run_config
-        
-               
-        # super().__init__(db_path, lock=True, lock_timeout=lock_timeout, force_open=force_open)
-        
+              
         try:
             self.n_threads = self.run_config['nthreads']
             self.problem_size = self.run_config['prob_size']
@@ -64,10 +60,11 @@ class RSWriter:
         
 
     def write_run_config(self):
+        assert self.run_config is not None, "run_config must be provided to write run configuration."
         
         config_record = {f"{key}":f"{str(value)}" for key, value in self.run_config.items()}
-        config_record['db_path'] = self.db_path
-        config_record['algs_db_path'] = self.alg_db_path
+        config_record['db_path'] = get_run_db_path(self.run_config, self.store_path, db_folder="logs")
+        config_record['algs_db_path'] = get_run_db_path(self.run_config, self.store_path, db_folder="algorithms")
               
         #read run_configs.csv at store_path.. create if not exists
         run_configs_path = os.path.join(self.store_path, "run_configs.csv")
@@ -82,10 +79,6 @@ class RSWriter:
         except Exception as e:
             raise IOError(f"Could not write run_configs.csv at {run_configs_path}: {e}")
         
-        with RocksStore(self.db_path, lock=True, lock_timeout=self.lock_timeout, force_open=self.force_open) as store:
-            config_key = "/run_config"
-            store.put_json(config_key, self.run_config)
-        
     def remove_duplicate_configs(self):
         run_configs_path = os.path.join(self.store_path, "run_configs.csv")
         if os.path.exists(run_configs_path):
@@ -93,17 +86,24 @@ class RSWriter:
             df.to_csv(run_configs_path, index=False)
         
     def write_case(self, case_md):
-        with RocksStore(self.db_path, lock=True, lock_timeout=self.lock_timeout, force_open=self.force_open) as store:         
+        assert self.run_config is not None, "run_config must be provided to write case metadata."
+        
+        db_path = get_run_db_path(self.run_config, self.store_path, db_folder="logs")
+        
+        with RocksStore(db_path, lock=True, lock_timeout=self.lock_timeout, force_open=self.force_open) as store:         
             case_md_key = f"/case_md/{self.n_threads}/{self.problem_size}/{self.batch_id}"
             store.put_df(case_md_key, case_md)
         
     def write_activity_log(self, activity_log):
+        assert self.run_config is not None, "run_config must be provided to write activity log."
+        
         if not activity_log.classifier_fn:
             raise ValueError("ActivityLog must have a classifier function defined.")
         
         class_name = activity_log.classifier_fn.__name__
         
-        store = RocksStore(self.db_path, lock=True, lock_timeout=self.lock_timeout, force_open=self.force_open)
+        db_path = get_run_db_path(self.run_config, self.store_path, db_folder="logs")
+        store = RocksStore(db_path, lock=True, lock_timeout=self.lock_timeout, force_open=self.force_open)
         
         for key, trace in activity_log.c_event_log.items():
             alg = key[0]
@@ -137,8 +137,9 @@ class RSWriter:
             with open(gen_step_file, 'r') as f:
                 alg_generation_steps[alg_name] = f.read()
         
-                
-        with RocksStore(self.alg_db_path, lock=True, lock_timeout=self.lock_timeout, force_open=self.force_open) as store:
+        
+        alg_db_path = get_run_db_path(self.run_config, self.store_path, db_folder="algorithms")        
+        with RocksStore(alg_db_path, lock=True, lock_timeout=self.lock_timeout, force_open=self.force_open) as store:
             prob_size = self.run_config['prob_size']
             for alg_name, code in alg_codes.items():
                 code_key = f"/algorithms/{prob_size}/{alg_name}"
@@ -147,13 +148,7 @@ class RSWriter:
             for alg_name, gen_steps in alg_generation_steps.items():
                 gen_steps_key = f"/generation_steps/{prob_size}/{alg_name}"
                 store.put_string(gen_steps_key, gen_steps)
-                
-    def write_facts_report(self, config, class_name, model_type, object_context, model_context, model_dot_str, report=""):
-        
-        # db_path = get_db_path, reports
-        # store dfg under /dfg_reports/class_name/n_threads/prob_size/dfg
-        # store context under /dfg_reports/class_name/n_threads/prob_size/context
-        pass
+            
         
         
         
@@ -201,7 +196,7 @@ class RSReader:
         case_mds = []
         for config in configs:
             store_path = config['store_path']
-            db_path = get_db_path(config, store_path) 
+            db_path = get_run_db_path(config, store_path, db_folder="logs") 
         
             if not os.path.exists(db_path):
                 raise FileNotFoundError(f"RocksDB not found at {db_path}")
@@ -244,7 +239,7 @@ class RSReader:
         
         for config in configs:
             store_path = config['store_path']
-            db_path = get_db_path(config, store_path)
+            db_path = get_run_db_path(config, store_path, db_folder="logs")
             
             if not os.path.exists(db_path):
                 raise FileNotFoundError(f"RocksDB not found at {db_path}")
@@ -289,11 +284,11 @@ class RSReader:
         return al
     
     def get_alg_code(self, alg_name, config):
-        alg_db_path = get_db_path(config, config['store_path'], db_folder="algorithms")
+        alg_db_path = get_run_db_path(config, config['store_path'], db_folder="algorithms")
         
         if not os.path.exists(alg_db_path):
             logger.warning(f"Algorithms RocksDB not found at {alg_db_path}")
-            return None, None
+            raise FileNotFoundError(f"Algorithms RocksDB not found at {alg_db_path}")
         
         prob_size = config['prob_size']
         with RocksStore(alg_db_path, lock=False) as store:
@@ -303,22 +298,86 @@ class RSReader:
                 alg_code = store.get_string(code_key)
                 gen_steps = store.get_string(gen_steps_key)
             except KeyError:
-                logger.warning(f"Algorithm {alg_name} not found in the store at {alg_db_path}")
-                return None, None
+                raise KeyError(f"Algorithm {alg_name} not found in the store at {alg_db_path}")
             
         return alg_code, gen_steps
     
-    def get_dfg_report(self, config, class_name):
-        # db_path = get_db_path, reports
-        # retrieve dfg under /dfg_reports/class_name/n_threads/prob_size/dfg
-        # retrieve context under /dfg_reports/class_name/n_threads/prob_size/context
-        pass
+  
+class RSSynthesisWriter:
+    def __init__(self, store_path,  lock_timeout=300, force_open=False):
         
-    
-    
+        self.store_path = store_path
+        if not os.path.exists(self.store_path):
+            os.makedirs(self.store_path, exist_ok=True)
+         
+        self.synthesis_db_path = os.path.join(self.store_path, "synthesis")       
+        self.lock_timeout = lock_timeout
+        self.force_open = force_open
+        
+    def write_context(self, class_name,
+                        object_context_data,
+                        activity_context_data,
+                        relation_context_data,
+                        language="",
+                        expr="",
+                        cluster_name="",
+                        aarch="",
+                        n_threads="",
+                        problem_size=""):
+        
+        
+        with RocksStore(self.synthesis_db_path, lock=True, lock_timeout=self.lock_timeout, force_open=self.force_open) as store:
+            key = os.path.join("/contexts", class_name,  language, expr, cluster_name, aarch, str(n_threads), str(problem_size))
             
+            obj_key = f"{key}/object"
+            activity_key = f"{key}/activity"
+            relation_key = f"{key}/relation"
+            
+            store.put_json(obj_key, object_context_data.model_dump_json())
+            store.put_json(activity_key, activity_context_data.model_dump_json())
+            store.put_json(relation_key, relation_context_data.model_dump_json())
 
         
 
+class RSSynthesisReader:
+    def __init__(self, store_path, lock_timeout=300, force_open=False):
+
+        self.synthesis_db_path = os.path.join(store_path, "synthesis")
+        if not os.path.exists(self.synthesis_db_path):
+            raise FileNotFoundError(f"Synthesis RocksDB not found at {self.synthesis_db_path}")
+                    
+        # args for opening RocksStore    
+        self.lock_timeout = lock_timeout
+        self.force_open = force_open
+        
+    def get_context(self, class_name,
+                    language="",
+                    expr="",
+                    cluster_name="",
+                    aarch="",
+                    n_threads="",
+                    problem_size=""):
+        
+        
+        with RocksStore(self.synthesis_db_path, lock=False) as store:
+            key = os.path.join("/contexts", class_name, language, expr, cluster_name, aarch, str(n_threads), str(problem_size))
+                        
+            obj_key = f"{key}/object"
+            activity_key = f"{key}/activity"
+            relation_key = f"{key}/relation"
+            try:
+                object_context_data = store.get_json(obj_key)
+                activity_context_data = store.get_json(activity_key)
+                relation_context_data = store.get_json(relation_key)
+            except KeyError:
+                raise KeyError(f"Key {key} not found in the store at {synthesis_db_path}")
+            
+            return {
+                "object": object_context_data,
+                "activity": activity_context_data,
+                "relation": relation_context_data
+            }
+            
+            
         
                 

@@ -2,7 +2,7 @@
 
 # Configuration
 REPO_URL="https://github.com/mlr2d/tvastar.git"
-TARGET_FOLDER="tvastar"
+TARGET_FOLDER="widget/tvastar"
 TEMP_DIR="tmp"
 
 echo "Starting update process..."

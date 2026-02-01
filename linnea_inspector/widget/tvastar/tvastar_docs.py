@@ -1,3 +1,11 @@
+# Tvastar
+#
+# Copyright (c) 2026 Aravind Sankaran
+# Developed in Aachen, Germany.
+#
+# Licensed under the BSD 3-Clause License.
+# See LICENSE file in the project root for full license information.
+
 from flask import Blueprint, render_template
 from . import config
 from .actions import examples 

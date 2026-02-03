@@ -34,8 +34,8 @@ class DFGRanksPerspective(DFGBasePerspective):
             label = f"{record['activity']} ({num_objs}/{self.total_objs})\n"
             if score != -1.0:
                 label += f"Rank Score: {score:.1f}\n"
-            label += f"Mean. FLOPs: {record['flops_mean']:.2e}\n"
-            label += f"Mean. Perf: {record['perf_mean']:.2f} F/ns"
+            label += f"Perf. class: {record['perf_class']}\n"
+            label += f"{record['flops_mean']:.2e} F @ {record['perf_mean']:.2f} GF/s"
             
             self.activity_label[record['activity']] = label
             self.activity_color[record['activity']] = self._get_activity_color(max(0, record['rank_score']), 0.0, max_activity_rank_score)

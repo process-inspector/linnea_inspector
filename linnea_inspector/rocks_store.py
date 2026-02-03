@@ -149,7 +149,41 @@ class RSWriter:
                 gen_steps_key = f"/generation_steps/{prob_size}/{alg_name}"
                 store.put_string(gen_steps_key, gen_steps)
             
+    
+    def delete_config_entry(self):
+        run_configs_path = os.path.join(self.store_path, "run_configs.csv")
+        if not os.path.exists(run_configs_path):
+            logger.warning(f"run_configs.csv not found at {run_configs_path}. Nothing to delete.")
+            return
         
+        df = pd.read_csv(run_configs_path)
+        
+        mask = True
+        for key, value in self.run_config.items():
+            if key not in ['store_path', 'db_path', 'algs_db_path', 'niter']:
+                mask &= (df[key] == value)
+        
+        df = df[~mask].reset_index(drop=True)
+        
+        df.to_csv(run_configs_path, index=False)
+        
+        #delete case_md and activity_log from RocksDB
+        db_path = get_run_db_path(self.run_config, self.store_path, db_folder="logs")
+        with RocksStore(db_path, lock=True, lock_timeout=self.lock_timeout, force_open=self.force_open) as store:
+            case_md_key = f"/case_md/{self.n_threads}/{self.problem_size}/{self.batch_id}"
+            try:
+                del store._store[case_md_key]
+            except KeyError:
+                logger.warning(f"Case metadata key {case_md_key} not found in the store at {db_path}")
+            
+            class_name = 'f_call'  # assuming f_call as default classifier
+            prefix = f"/activity_log/{class_name}/{self.n_threads}/{self.problem_size}/{self.batch_id}/"
+            keys_to_delete = [key for key in store._store.keys() if key.startswith(prefix)]
+            for key in keys_to_delete:
+                try:
+                    del store._store[key]
+                except KeyError:
+                    logger.warning(f"Activity log key {key} not found in the store at {db_path}")    
         
         
 class RSReader:

@@ -1,0 +1,153 @@
+{% extends 'inspector/base.html' %}
+{% import 'tvst-macros/bs-cards.html' as card_macros %}
+{% import 'tvst-macros/dfgs.html' as dfg_macros %}
+{% import 'tvst-macros/pr-boxplots.html' as bp_macros %}
+{% import 'tvst-macros/datatables.html' as dt_macros %}
+{% import 'tvst-macros/dataframes.html' as df_macros %}
+
+    
+{% block content %}
+
+<div class="container-fluid py-4">
+    
+    {% call card_macros.render_card_basic(
+        title='Fact details',
+        header_class='tvst-card h5'
+    ) %}
+        <div class="row">
+            <div class="col-md-4">
+                <table style="border-collapse: separate;">
+                    <tr>
+                        <th style="text-align: left; padding-right: 15px;">Object</th>
+                        <td>Algorithms</td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: left; padding-right: 15px;">Num. objects</th>
+                        <td>{{ object_info['objects']|length }}</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="#" class="btn btn-sm btn-secondary">NL report</a>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-4">
+                <table style="border-collapse: separate;">
+                    <tr>
+                        <th style="text-align: left; padding-right: 15px;">Language</th>
+                        <td>{{ language }}</td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: left; padding-right: 15px;">Expression</th>
+                        <td>{{ expr }}</td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: left; padding-right: 15px;">Problem Size</th>
+                        <td>{{ prob_size }}</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-4">
+                <table style="border-collapse: separate;">
+                    <tr>
+                        <th style="text-align: left; padding-right: 15px;">Cluster Name</th>
+                        <td>{{ cluster_name }}</td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: left; padding-right: 15px;">Architecture</th>
+                        <td>{{ aarch }}</td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: left; padding-right: 15px;">Number of Threads</th>
+                        <td>{{ nthreads }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    {% endcall %}
+</div>
+
+
+<div class="container-fluid py-4">
+    
+    {% call card_macros.render_card_basic(
+        title='DFG',
+        header_class='tvst-card h5'
+    ) %}
+        {{ dfg_macros.render_interactive_dfg_for_pi(
+            dfg_id='dfg',
+            dfg_svg=dfg_svg,
+            node_info=node_info
+        ) }}
+    {% endcall %}
+</div>
+
+<div class="container-fluid py-4">
+    {% call card_macros.render_card_basic(
+        title='Algorithm Execution Times',
+        header_class='tvst-card h5'
+    ) %}
+    {{ bp_macros.render_bp(
+        bp_id='pr_algorithms',
+        bp_data=object_info['bp_data'],
+        x_label=object_info['bp_x_label'],
+        boxHeight=50, 
+        width=800, 
+        yTickSize=12, 
+        showOutliers=true,
+        ranks=object_info['ranks']
+    ) }}    
+    {% endcall %}
+</div>
+
+<div class="container-fluid py-4">
+    {% call card_macros.render_card_basic(
+        title='Algorithm Statistics',
+        header_class='tvst-card h5'
+    ) %}
+        {% call dt_macros.render_dt(
+            table_id='stats_algorithms',
+            table_class='tvst-table display',
+            page_length=5
+        ) %}
+        {% set col_schema = object_info['col_schema'] %}
+        {% set records = object_info['records'] %}
+            <thead>
+                <tr>
+                    {% for col in col_schema %}
+                    <th>{{ col.label }}</th>
+                    {% endfor %}
+                </tr>
+                <tr>
+                    {% for col in col_schema %}
+                    <th><input type="text" data-col="{{ loop.index0 }}" placeholder="filter"></th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in records %}
+                <tr>
+                    {% for col in col_schema %}
+                        {% if col.id == 'obj' %}
+                            <td>
+                            <a target="_blank" rel="noopener noreferrer" href="{{ url_for('inspector.algorithm_code', alg_name=row[col.id], language=language,
+                                expr=expr, cluster_name=cluster_name, aarch=aarch, nthreads=nthreads,
+                                prob_size=prob_size) }}">
+                                {{ row[col.id] }}
+                            </a>
+                        </td>
+                        {% elif col.type == 'decimal' %}
+                            <td>{{ row[col.id] | round(4) }}</td>
+                        {% else %}
+                            <td>{{ row[col.id] }}</td>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        {% endcall %}
+    {% endcall %}
+</div>
+
+{% endblock content %}

@@ -58,10 +58,19 @@ Example data:
 
     {% set safe_id = dfg_id | replace('-', '_') %}
     {% for node in node_info.nodes %}
-        {% set safe_node_id = node | replace(' ', '_') | replace('+', '_plus_') | replace('/', '_') %}
+        {% set safe_node_id = node
+        | replace(' ', '_')
+        | replace('+', '_plus_')
+        | replace('/', '_')
+        | replace(':', '_colon_')
+        | replace('.', '_dot_')
+        | replace(',', '_comma_')
+        | replace('=', '_eq_')
+        %}
+
 
         {% call(section) modal_macros.render_modal(
-            modal_id=dfg_id~"-"~safe_node_id,
+            modal_id=safe_id~"-"~safe_node_id,
             title=node, 
             dialoag_class='modal-xl modal-dialog-centered modal-dialog-scrollable'
         ) %}
@@ -136,7 +145,14 @@ Example data:
         
 
         function _handleNodeInfo_{{safe_id}}(node_name){
-            const node_id = node_name.replace(/ /g, '_').replace(/\+/g, '_plus_').replace(/\//g, '_');
+            const node_id = node_name
+                            .replace(/ /g, '_')
+                            .replace(/\+/g, '_plus_')
+                            .replace(/\//g, '_')
+                            .replace(/:/g, '_colon_')
+                            .replace(/\./g, '_dot_')
+                            .replace(/,/g, '_comma_')
+                            .replace(/=/g, '_eq_');
             const modalId = `{{ dfg_id }}-${node_id}`;
             const modalElement = document.getElementById(modalId);
             if (modalElement) {

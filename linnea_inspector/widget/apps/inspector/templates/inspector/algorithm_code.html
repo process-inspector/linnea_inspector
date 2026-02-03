@@ -1,0 +1,73 @@
+{% extends 'inspector/base.html' %}
+{% import 'tvst-macros/bs-cards.html' as card_macros %}
+
+{% block title %}
+    {{ alg_name }}
+{% endblock title %}
+    
+{% block content %}
+<div class="container-fluid py-4">
+    
+        {% call(section) card_macros.render_card_with_custom_header(
+            header_class='tvst-card'
+        ) %}
+
+            {% if section == 'header' %}
+                <h5>{{ alg_name }}</h5>
+            {% elif section == 'body' %}
+                <div class="row">
+                    <div class="col-md-5">
+                        <table style="border-collapse: separate;">
+                            <tr>
+                                <th style="text-align: left; padding-right: 15px;">Language</th>
+                                <td>{{ language }}</td>
+                            </tr>
+                            <tr>
+                                <th style="text-align: left; padding-right: 15px;">Expression</th>
+                                <td>{{ expr }}</td>
+                            </tr>
+                            <tr>
+                                <th style="text-align: left; padding-right: 15px;">Problem Size</th>
+                                <td>{{ prob_size }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-5">
+                        <table style="border-collapse: separate;">
+                            <tr>
+                                <th style="text-align: left; padding-right: 15px;">Cluster Name</th>
+                                <td>{{ cluster_name }}</td>
+                            </tr>
+                            <tr>
+                                <th style="text-align: left; padding-right: 15px;">Architecture</th>
+                                <td>{{ aarch }}</td>
+                            </tr>
+                            <tr>
+                                <th style="text-align: left; padding-right: 15px;">Number of Threads</th>
+                                <td>{{ nthreads }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            {% endif %}
+    {% endcall %}
+</div>
+
+<div class="container-fluid py-4">  
+    {% call card_macros.render_card_basic(
+        title='Code',
+        header_class='tvst-card h5'
+    ) %}
+        <pre><code>{{ code }}</code></pre>
+    {% endcall %}
+</div>
+
+<div class="container-fluid py-4">  
+    {% call card_macros.render_card_basic(
+        title='Generation Steps',
+        header_class='tvst-card h5'
+    ) %}
+        <pre><code>{{ gen_steps }}</code></pre>
+    {% endcall %}
+</div>
+{% endblock content %}

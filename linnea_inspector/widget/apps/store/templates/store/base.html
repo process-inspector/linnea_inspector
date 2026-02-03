@@ -1,4 +1,5 @@
 {% extends 'tvst-bases/nav-top.html' %}
+{% import 'tvst-macros/dependencies.html' as deps %}
 
 
 {% block copyright %}
@@ -13,8 +14,10 @@ LICENSE file. If not, see <https://opensource.org/licenses/BSD-3-Clause>.
     
 
 {% block title %}
-    App2
+    Linnea Inspector
 {% endblock title %}
+
+{% block body_font_family %}Segoe UI{% endblock body_font_family %}
 
 {% block navbar_txt_color %}white{% endblock navbar_txt_color %}
 
@@ -25,30 +28,33 @@ LICENSE file. If not, see <https://opensource.org/licenses/BSD-3-Clause>.
 {% block body_padding_bottom %}40px{% endblock body_padding_bottom %}
 
 {% block head %}
+{{ deps.include_dt_deps() }}
+{{ deps.include_bp_deps() }}
+
+<style>
+    .tvst-table {
+        font-size: 14px;
+    }
+</style>
 {% endblock head %}
 
 {% block brand_url %}
-{{ url_for('app2.index') }}
+{{ url_for('store.index') }}
 {% endblock brand_url %}
 
 {% block brand_name %}
-    App2
+    Linnea Inspector
 {% endblock brand_name %}
 
 {% block navbar_left %}
-    <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('app2.index') }}">Home</a>
-    </li>
-    
+
 {% endblock navbar_left %}
 
 
 {% block navbar_right %}
     <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('app1.index') }}">App1</a>
+        <a class="nav-link" href="{{ url_for('store.experiments') }}">Experiments</a>
     </li>
-    
-
 {% endblock navbar_right %}
 
     
@@ -57,7 +63,7 @@ LICENSE file. If not, see <https://opensource.org/licenses/BSD-3-Clause>.
 {% endblock content %}
 
 {% block footer %}
-    &copy; 2026 App2
+    &copy; 2026 RWTH Aachen University
 {% endblock footer %}
 
 {% block end_scripts %}

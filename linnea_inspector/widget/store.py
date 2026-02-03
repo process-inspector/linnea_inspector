@@ -12,11 +12,8 @@ app = Flask(__name__)
 from .tvastar import tvastar
 app.register_blueprint(tvastar.bp, url_prefix=f'{app_mount}/{tvastar.name}')
 
-from .tvastar import tvastar_docs
-app.register_blueprint(tvastar_docs.bp, url_prefix=f'{app_mount}/{tvastar_docs.name}')
-
-from .apps.inspector import inspector
-app.register_blueprint(inspector.bp, url_prefix=f'{app_mount}/')
+from .apps.store import store
+app.register_blueprint(store.bp, url_prefix=f'{app_mount}/')
 
 
 def main():

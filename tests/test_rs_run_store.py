@@ -85,10 +85,25 @@ def test_write_context():
     dfg_context = DFGContext(activity_log, obj_context.data, obj_key='alg', compute_ranks=True)
     
     rs_writer = RSWriter(confs[0], store_path[0])
+    
+def test_delete_context():
+    store_path = ["tests/store/test.rs",]
+    rs_reader = RSReader(store_path)
+    
+    confs = rs_reader.get_confs(prob_size="[1000, 1000]", batch_id=1)
+    
+    for conf in confs:
+        rs_writer = RSWriter(conf, conf['store_path'])
+        rs_writer.delete_config_entry()
+    
+    print(f"Deleting contexts:")
+    print(confs)
+    
   
 if __name__ == "__main__":
-    test_write("tests/traces/b0")
-    test_write("tests/traces/b1")
-    test_read()
-    test_read_alg_code()
+    # test_write("tests/traces/b0")
+    # test_write("tests/traces/b1")
+    # test_read()
+    # test_read_alg_code()
+    test_delete_context()
     

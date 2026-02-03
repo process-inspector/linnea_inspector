@@ -96,5 +96,5 @@ def test_read(store_path):
 if __name__ == "__main__":
     store_path = ["tests/store/test.rs",]
     
-    # test_write(store_path)
+    test_write(store_path)
     test_read(store_path)

@@ -49,6 +49,6 @@ def experiments_delete():
     selected_ids = request.get_json().get('ids', [])
     if selected_ids:
         experiments_handler.delete_runs(selected_ids, config.get_reader().run_configs)
-        logger.info(f"Deleted experiments with IDs: {selected_ids}")
+        config.init()  # Re-initialize to refresh data after deletion
     return '', 204
     

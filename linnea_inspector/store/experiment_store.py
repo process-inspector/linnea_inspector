@@ -58,7 +58,7 @@ class ExperimentWriter:
         if os.path.exists(run_configs_path):
             run_configs_df = pd.read_csv(run_configs_path)
             run_configs_df = pd.concat([run_configs_df, pd.DataFrame([config_record])], ignore_index=True)
-            run_configs_df = run_configs_df.drop_duplicates().reset_index(drop=True)
+            #run_configs_df = run_configs_df.drop_duplicates().reset_index(drop=True).. does not work..
         else:
             run_configs_df = pd.DataFrame([config_record])
         
@@ -68,7 +68,6 @@ class ExperimentWriter:
             raise IOError(f"Could not write run_configs.csv at {run_configs_path}: {e}")
         
     def remove_duplicate_configs(self):
-        ## redundunt
         run_configs_path = os.path.join(self.store_path, "run_configs.csv")
         if os.path.exists(run_configs_path):
             df = pd.read_csv(run_configs_path).drop_duplicates().reset_index(drop=True)

@@ -1,4 +1,4 @@
-from linnea_inspector.rocks_store import RSReader
+from linnea_inspector.store.experiment_store import ExperimentReader
 
 import logging
 logger = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ def init():
     
     store_paths = [path.strip() for path in app_data_paths.split(',') if path.strip()]
     try:
-        READER = RSReader(store_paths)
+        READER = ExperimentReader(store_paths)
     except Exception as e:
         raise RuntimeError(f"Failed to initialize config with data path {store_paths}: {e}")
     

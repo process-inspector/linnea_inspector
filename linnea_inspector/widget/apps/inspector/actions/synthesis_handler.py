@@ -1,5 +1,5 @@
 from .. import config
-from linnea_inspector.rocks_store import RSSynthesisReader
+from linnea_inspector.store.synthesis_store import SynthesisReader
 from linnea_inspector.dfg.ranks_perspective import DFGRanksPerspective
 from process_inspector.schemas import ObjectSchema, ActivitySchema, RelationSchema
 import re
@@ -18,7 +18,7 @@ def get_facts_algs(language, expr, cluster_name, aarch, n_threads, problem_size)
     if not confs:
         raise ValueError("No configurations found for the given parameters.")
     store_path = confs[0]['store_path']
-    synthesis_reader = RSSynthesisReader(store_path)
+    synthesis_reader = SynthesisReader(store_path)
     
     context_data = synthesis_reader.get_context(
         class_name="f_call",

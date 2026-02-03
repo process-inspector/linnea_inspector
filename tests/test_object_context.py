@@ -1,6 +1,6 @@
 from linnea_inspector.data_processor import LogsProcessor
 from linnea_inspector.object_context import ObjectContext
-from linnea_inspector.rocks_store import RSReader
+from linnea_inspector.store.experiment_store import ExperimentReader
 
 def test_lp(log_dir):
     
@@ -15,9 +15,9 @@ def test_lp(log_dir):
         
     print("SUCCESS")
     
-def test_rs(store_path):
-    rs_reader = RSReader(store_path)
-    confs = rs_reader.get_confs(
+def test_store(store_path):
+    reader = ExperimentReader(store_path)
+    confs = reader.get_confs(
         expr="GLS_XX",
         prob_size="[1000, 1000]")
     
@@ -25,7 +25,7 @@ def test_rs(store_path):
         print("No configurations found.")
         return
     
-    case_md = rs_reader.get_case_md(confs, add_objs_from_config=['expr', 'prob_size'])
+    case_md = reader.get_case_md(confs, add_objs_from_config=['expr', 'prob_size'])
     print("Case Metadata:", case_md.head())
 
     obj_context = ObjectContext(case_md, obj_key='alg', compute_ranks=True)
@@ -40,4 +40,4 @@ if __name__ == "__main__":
     # test_lp(log_dir)
     
     store_path = ["tests/store/test.rs",]
-    test_rs(store_path)
+    test_store(store_path)

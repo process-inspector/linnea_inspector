@@ -4,8 +4,8 @@ import os
 import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-from linnea_inspector.rocks_store import RSReader
-from linnea_inspector.rocks_store import RSSynthesisWriter, RSSynthesisReader
+from linnea_inspector.store.experiment_store import ExperimentReader
+from linnea_inspector.store.synthesis_store import SynthesisWriter, SynthesisReader
 
 from process_inspector.activity_log import ActivityLog
 from linnea_inspector.classifiers.f_call import f_call
@@ -17,8 +17,8 @@ from linnea_inspector.dfg.ranks_perspective import DFGRanksPerspective
 from process_inspector.schemas import ObjectSchema, ActivitySchema, RelationSchema
 
 def test_write(store_path):
-    rs_reader = RSReader(store_path)
-    confs = rs_reader.get_confs(
+    reader = ExperimentReader(store_path)
+    confs = reader.get_confs(
         expr="GLS_XX",
         prob_size="[1000, 1000]")
     
@@ -26,16 +26,17 @@ def test_write(store_path):
         print("No configurations found.")
         return
     
-    case_md = rs_reader.get_case_md(confs)
+    # print(confs)
+    case_md = reader.get_case_md(confs)
     obj_context = ObjectContext(case_md, obj_key='alg', compute_ranks=True)
     
-    activity_log = rs_reader.get_activity_log(confs, class_name="f_call")
+    activity_log = reader.get_activity_log(confs, class_name="f_call")
 
     dfg_context = DFGContext(activity_log, obj_context.data, obj_key='alg', compute_ranks=True)
     
     
     
-    synthesis_writer = RSSynthesisWriter(store_path[0]) # can be different from read store path
+    synthesis_writer = SynthesisWriter(store_path[0]) # can be different from read store path
     
     synthesis_writer.write_context(
         class_name="f_call",
@@ -52,8 +53,8 @@ def test_write(store_path):
     print("SUCCESS") 
     
 def test_read(store_path):
-    rs_reader = RSReader(store_path)
-    confs = rs_reader.get_confs(
+    reader = ExperimentReader(store_path)
+    confs = reader.get_confs(
         expr="GLS_XX",
         prob_size="[1000, 1000]")
     
@@ -63,7 +64,7 @@ def test_read(store_path):
     
     config = confs[0]
     
-    synthesis_reader = RSSynthesisReader(store_path[0])
+    synthesis_reader = SynthesisReader(store_path[0])
     
     context_data = synthesis_reader.get_context(
         class_name="f_call",

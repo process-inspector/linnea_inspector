@@ -81,7 +81,7 @@ class SynthesisReader:
                 activity_context_data = store.get_json(activity_key)
                 relation_context_data = store.get_json(relation_key)
             except KeyError:
-                raise KeyError(f"Key {key} not found in the store at {synthesis_db_path}")
+                raise KeyError(f"Key {key} not found in the store at {self.synthesis_db_path}")
             
             return {
                 "object": object_context_data,

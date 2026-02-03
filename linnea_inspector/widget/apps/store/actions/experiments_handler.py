@@ -1,4 +1,5 @@
 
+from linnea_inspector.store.utils import delete_experiment, update_synthesis
 import logging
 logger = logging.getLogger(__name__)
 
@@ -32,4 +33,10 @@ def delete_runs(ids, df):
     
     ids = [int(i) for i in ids]
     to_delete = df[df['id'].isin(ids)]
-    # print(to_delete.to_dict('records'))
+    # drop column 'id' to match run_config structure
+    to_delete = to_delete.drop(columns=['id'])
+    confs = to_delete.to_dict('records')
+    for conf in confs:
+        delete_experiment(conf)
+        update_synthesis(conf)
+    logger.info(f"Deleted runs with IDs: {ids}")

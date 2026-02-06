@@ -1,3 +1,9 @@
+# Linnea Inspector
+# Copyright (c) 2021-2026 Aravind Sankaran
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# See LICENSE file in the project root for full license information.
+
 from flask import Blueprint, render_template, redirect, url_for, request
 
 from . import config
@@ -49,6 +55,7 @@ def facts_algorithms(language, expr, cluster_name, aarch, nthreads, prob_size):
     try:
         dfg_svg, node_info, object_info = synthesis_handler.get_facts_algs(language, expr, cluster_name, aarch, nthreads, prob_size)
     except KeyError as e:
+        ## TODO: may be try by getting the activity log..
         return render_template(f'{name}/error.html', message=str(e))
     
     return render_template(f'{name}/facts_algorithms.html',

@@ -1,3 +1,9 @@
+# Linnea Inspector
+# Copyright (c) 2021-2026 Aravind Sankaran
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# See LICENSE file in the project root for full license information.
+
 from linnea_inspector.data_processor import LogsProcessor
 from linnea_inspector.classifiers.f_call import f_call
 from process_inspector.event_log import EventLog

@@ -3,5 +3,5 @@ recursive-include linnea_inspector/widget/tvastar/templates *
 recursive-include linnea_inspector/widget/tvastar/eg_data *
 include linnea_inspector/widget/tvastar/LICENSE
 include linnea_inspector/widget/update_tvastar.sh
-recursive-include linnea_inspector/widget/apps/app1/templates *
-recursive-include linnea_inspector/widget/apps/app2/templates *
+recursive-include linnea_inspector/widget/apps/inspector/templates *
+recursive-include linnea_inspector/widget/apps/store/templates *

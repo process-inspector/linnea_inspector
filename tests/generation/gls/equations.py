@@ -15,5 +15,4 @@ def get_equations(m,n):
         b = Vector("b", (m, 1))
 
         equations = Equations(Equal(b, Times(Inverse(Times(Transpose(X), Inverse(M), X ) ), Transpose(X), Inverse(M), y)))
-        
         return equations

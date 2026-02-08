@@ -10,7 +10,7 @@ import os
 import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-from linnea_inspector.store.experiment_store import ExperimentReader
+from linnea_inspector.store.experiment_store import ExperimentReader, find_store_paths
 from linnea_inspector.store.synthesis_store import SynthesisWriter, SynthesisReader
 
 from process_inspector.activity_log import ActivityLog
@@ -22,8 +22,10 @@ from linnea_inspector.dfg.ranks_perspective import DFGRanksPerspective
 
 from process_inspector.schemas import ObjectSchema, ActivitySchema, RelationSchema
 
-def test_write(store_path):
-    reader = ExperimentReader(store_path)
+def test_write(store_root):
+    store_paths = find_store_paths(store_root)
+    reader = ExperimentReader(store_paths)
+    
     confs = reader.get_confs(
         expr="GLS_XX",
         prob_size="[1000, 1000]")
@@ -41,8 +43,9 @@ def test_write(store_path):
     dfg_context = DFGContext(activity_log, obj_context.data, obj_key='alg', compute_ranks=True)
     
     
-    
-    synthesis_writer = SynthesisWriter(store_path[0]) # can be different from read store path
+    # synth_store_path = get_experiment_db_path(confs[0], store_path[0], db_folder="synthesis")
+    synth_store_path = os.path.join(store_paths[0], "synthesis")
+    synthesis_writer = SynthesisWriter(synth_store_path)
     
     synthesis_writer.write_context(
         class_name="f_call",
@@ -58,8 +61,9 @@ def test_write(store_path):
     )
     print("SUCCESS") 
     
-def test_read(store_path):
-    reader = ExperimentReader(store_path)
+def test_read(store_root):
+    store_paths = find_store_paths(store_root)
+    reader = ExperimentReader(store_paths)
     confs = reader.get_confs(
         expr="GLS_XX",
         prob_size="[1000, 1000]")
@@ -70,7 +74,8 @@ def test_read(store_path):
     
     config = confs[0]
     
-    synthesis_reader = SynthesisReader(store_path[0])
+    synth_store_path = os.path.join(store_paths[0], "synthesis")
+    synthesis_reader = SynthesisReader(synth_store_path)
     
     context_data = synthesis_reader.get_context(
         class_name="f_call",
@@ -101,7 +106,7 @@ def test_read(store_path):
     print("SUCCESS") 
     
 if __name__ == "__main__":
-    store_path = ["tests/store/test.rs",]
+    store_root = "tests/store/test.rs"
     
-    test_write(store_path)
-    test_read(store_path)
+    test_write(store_root)
+    test_read(store_root)

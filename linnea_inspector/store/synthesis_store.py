@@ -17,7 +17,7 @@ class SynthesisWriter:
         if not os.path.exists(self.store_path):
             os.makedirs(self.store_path, exist_ok=True)
          
-        self.synthesis_db_path = os.path.join(self.store_path, "synthesis")       
+        # self.synthesis_db_path = os.path.join(self.store_path, "synthesis")       
         self.lock_timeout = lock_timeout
         self.force_open = force_open
         
@@ -33,7 +33,7 @@ class SynthesisWriter:
                         problem_size=""):
         
         
-        with RocksStore(self.synthesis_db_path, lock=True, lock_timeout=self.lock_timeout, force_open=self.force_open) as store:
+        with RocksStore(self.store_path, lock=True, lock_timeout=self.lock_timeout, force_open=self.force_open) as store:
             key = os.path.join("/contexts", class_name,  language, expr, cluster_name, aarch, str(n_threads), str(problem_size))
             
             obj_key = f"{key}/object"
@@ -47,9 +47,10 @@ class SynthesisWriter:
 class SynthesisReader:
     def __init__(self, store_path, lock_timeout=300, force_open=False):
 
-        self.synthesis_db_path = os.path.join(store_path, "synthesis")
-        if not os.path.exists(self.synthesis_db_path):
-            raise FileNotFoundError(f"Synthesis RocksDB not found at {self.synthesis_db_path}")
+        # self.synthesis_db_path = os.path.join(store_path, "synthesis")
+        self.store_path = store_path
+        if not os.path.exists(self.store_path):
+            raise FileNotFoundError(f"Synthesis RocksDB not found at {self.store_path}")
                     
         # args for opening RocksStore    
         self.lock_timeout = lock_timeout
@@ -64,7 +65,7 @@ class SynthesisReader:
                     problem_size=""):
         
         
-        with RocksStore(self.synthesis_db_path, lock=False) as store:
+        with RocksStore(self.store_path, lock=False) as store:
             key = os.path.join("/contexts", class_name, language, expr, cluster_name, aarch, str(n_threads), str(problem_size))
                         
             obj_key = f"{key}/object"
@@ -75,7 +76,7 @@ class SynthesisReader:
                 activity_context_data = store.get_json(activity_key)
                 relation_context_data = store.get_json(relation_key)
             except KeyError:
-                raise KeyError(f"Key {key} not found in the store at {self.synthesis_db_path}")
+                raise KeyError(f"Key {key} not found in the store at {self.store_path}")
             
             return {
                 "object": object_context_data,

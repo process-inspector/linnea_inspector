@@ -1,4 +1,4 @@
-from linnea_inspector.store.experiment_store import ExperimentReader
+from linnea_inspector.store.experiment_store import ExperimentReader, find_store_paths
 
 import logging
 logger = logging.getLogger(__name__)
@@ -12,11 +12,21 @@ READER = None
 def init():
     global READER
     global FACTS_INDEX_ALGS
-    app_data_paths = os.getenv('LI_STORE_PATHS', '')
-    assert app_data_paths, "Environment variable LI_STORE_PATHS is not set or empty."
+    app_data_paths = os.getenv('LI_STORE_ROOTS', '')
+    assert app_data_paths, "Environment variable LI_STORE_ROOTS is not set or empty."
     
-    store_paths = [path.strip() for path in app_data_paths.split(',') if path.strip()]
+    store_roots = [path.strip() for path in app_data_paths.split(',') if path.strip()]
     try:
+        store_paths = []
+        for root in store_roots:
+            paths = find_store_paths(root)
+            if not paths:
+                logger.warning(f"No valid store paths found in root: {root}")
+            else:
+                store_paths.extend(paths)
+        if not store_paths:
+            raise FileNotFoundError(f"No valid store paths found in any of the specified roots: {store_roots}") 
+      
         READER = ExperimentReader(store_paths)
     except Exception as e:
         raise RuntimeError(f"Failed to initialize config with data path {store_paths}: {e}")

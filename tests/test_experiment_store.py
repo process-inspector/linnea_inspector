@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # See LICENSE file in the project root for full license information.
 
-from linnea_inspector.store.experiment_store import ExperimentWriter, ExperimentReader
+from linnea_inspector.store.experiment_store import ExperimentWriter, ExperimentReader, find_store_paths
 import json
 import os
 import shutil
@@ -21,12 +21,12 @@ def test_write(log_dir):
     activity_log = ActivityLog(processor.event_log, f_call) 
 
     
-    store_path = "tests/store/test.rs"
-    # if os.path.exists(store_path):
-    #     shutil.rmtree(store_path)
-    #     logging.info(f"Removed existing store at {store_path}")
+    store_root = "tests/store/test.rs"
+    # if os.path.exists(store_root):
+    #     shutil.rmtree(store_root)
+    #     logging.info(f"Removed existing store at {store_root}")
         
-    writer = ExperimentWriter(processor.run_config, store_path)
+    writer = ExperimentWriter(store_root, processor.run_config)
     logging.info(f"Opened RS store at {writer.store_path}")
     writer.write_run_config()
     writer.remove_duplicate_configs()
@@ -36,8 +36,11 @@ def test_write(log_dir):
             
 
 def test_read():
-    store_path = ["tests/store/test.rs",]
-    reader = ExperimentReader(store_path)
+    store_root = "tests/store/test.rs"
+    store_paths = find_store_paths(store_root)
+    print(f"Found store paths: {store_paths}")
+    
+    reader = ExperimentReader(store_paths)
     
     df = reader.run_configs
     print(df)
@@ -64,8 +67,9 @@ def test_read():
         break    
     
 def test_read_alg_code():
-    store_path = ["tests/store/test.rs",]
-    reader = ExperimentReader(store_path)
+    store_root = "tests/store/test.rs"
+    store_paths = find_store_paths(store_root)
+    reader = ExperimentReader(store_paths)
     
     confs = reader.get_confs(prob_size="[1000, 1000]")
     alg_name = "algorithm0"

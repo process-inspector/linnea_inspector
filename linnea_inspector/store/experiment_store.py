@@ -9,20 +9,43 @@ import os
 import glob
 import pandas as pd
 from process_inspector.activity_log import ActivityLog
-from .utils import get_experiment_db_path
 
 import logging
 logger = logging.getLogger(__name__)
 
+def get_store_path(store_root, run_config):
+    try:
+        language = run_config['language']
+        expr = run_config['expr']
+        cluster_name = run_config['cluster_name']
+        aarch = run_config['aarch']
+    except KeyError as e:
+        raise KeyError(f"Missing expected keys in run_config: {e}")
+    
+    store_path = os.path.join(store_root, expr, language, cluster_name, aarch)
+    return store_path
+
+def find_store_paths(store_root):
+    # find all paths in sub dir of store_root that contain run_configs.csv
+    store_paths = []
+    for root, dirs, files in os.walk(store_root):
+        if "run_configs.csv" in files:
+            store_paths.append(root)
+    return store_paths 
+
+
 class ExperimentWriter:
 
-    def __init__(self, run_config, store_path,  lock_timeout=300, force_open=False):
+    def __init__(self, store_root, run_config,  lock_timeout=300, force_open=False):
         
-        self.store_path = store_path
+        self.store_root = store_root
+        
+        self.run_config = run_config
+        self.store_path = get_store_path(store_root, run_config)
+        
         if not os.path.exists(self.store_path):
             os.makedirs(self.store_path, exist_ok=True)
         
-        self.run_config = run_config
               
         try:
             self.n_threads = self.run_config['nthreads']
@@ -44,8 +67,9 @@ class ExperimentWriter:
         assert self.run_config is not None, "run_config must be provided to write run configuration."
         
         config_record = {f"{key}":f"{str(value)}" for key, value in self.run_config.items()}
-        config_record['db_path'] = get_experiment_db_path(self.run_config, self.store_path, db_folder="logs")
-        config_record['algs_db_path'] = get_experiment_db_path(self.run_config, self.store_path, db_folder="algorithms")
+        config_record['store_path'] = self.store_path
+        # config_record['db_path'] = get_experiment_db_path(self.run_config, self.store_root, db_folder="logs")
+        # config_record['algs_db_path'] = get_experiment_db_path(self.run_config, self.store_root, db_folder="algorithms")
               
         #read run_configs.csv at store_path.. create if not exists
         run_configs_path = os.path.join(self.store_path, "run_configs.csv")
@@ -70,7 +94,7 @@ class ExperimentWriter:
     def write_case(self, case_md):
         assert self.run_config is not None, "run_config must be provided to write case metadata."
         
-        db_path = get_experiment_db_path(self.run_config, self.store_path, db_folder="logs")
+        db_path = os.path.join(self.store_path, "logs")
         
         with RocksStore(db_path, lock=True, lock_timeout=self.lock_timeout, force_open=self.force_open) as store:         
             case_md_key = f"/case_md/{self.n_threads}/{self.problem_size}/{self.batch_id}"
@@ -84,7 +108,7 @@ class ExperimentWriter:
         
         class_name = activity_log.classifier_fn.__name__
         
-        db_path = get_experiment_db_path(self.run_config, self.store_path, db_folder="logs")
+        db_path = os.path.join(self.store_path, "logs")
         store = RocksStore(db_path, lock=True, lock_timeout=self.lock_timeout, force_open=self.force_open)
         
         for key, trace in activity_log.c_event_log.items():
@@ -120,8 +144,8 @@ class ExperimentWriter:
                 alg_generation_steps[alg_name] = f.read()
         
         
-        alg_db_path = get_experiment_db_path(self.run_config, self.store_path, db_folder="algorithms")        
-        with RocksStore(alg_db_path, lock=True, lock_timeout=self.lock_timeout, force_open=self.force_open) as store:
+        db_path = os.path.join(self.store_path, "algorithms")        
+        with RocksStore(db_path, lock=True, lock_timeout=self.lock_timeout, force_open=self.force_open) as store:
             prob_size = self.run_config['prob_size']
             for alg_name, code in alg_codes.items():
                 code_key = f"/algorithms/{prob_size}/{alg_name}"
@@ -142,7 +166,7 @@ class ExperimentReader:
                 raise FileNotFoundError(f"run_configs.csv not found at {run_configs_path}")
 
             df = pd.read_csv(run_configs_path)
-            df['store_path'] = store_path
+            # df['store_path'] = store_path
             run_configs.append(df)            
         
         self.run_configs = pd.DataFrame()
@@ -176,7 +200,7 @@ class ExperimentReader:
         case_mds = []
         for config in configs:
             store_path = config['store_path']
-            db_path = get_experiment_db_path(config, store_path, db_folder="logs") 
+            db_path = os.path.join(store_path, "logs")
         
             if not os.path.exists(db_path):
                 raise FileNotFoundError(f"RocksDB not found at {db_path}")
@@ -219,7 +243,7 @@ class ExperimentReader:
         
         for config in configs:
             store_path = config['store_path']
-            db_path = get_experiment_db_path(config, store_path, db_folder="logs")
+            db_path = os.path.join(store_path, "logs")
             
             if not os.path.exists(db_path):
                 raise FileNotFoundError(f"RocksDB not found at {db_path}")
@@ -264,7 +288,7 @@ class ExperimentReader:
         return al
     
     def get_alg_code(self, alg_name, config):
-        alg_db_path = get_experiment_db_path(config, config['store_path'], db_folder="algorithms")
+        alg_db_path = os.path.join(config['store_path'], "algorithms")
         
         if not os.path.exists(alg_db_path):
             logger.warning(f"Algorithms RocksDB not found at {alg_db_path}")

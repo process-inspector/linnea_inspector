@@ -4,12 +4,15 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # See LICENSE file in the project root for full license information.
 
-from linnea_inspector.store.experiment_store import ExperimentReader
+from linnea_inspector.store.experiment_store import ExperimentReader, find_store_paths
 from linnea_inspector.store.utils import delete_experiment, update_synthesis
 
 def test_delete():
-    store_path = ["tests/store/test.rs",]
-    reader = ExperimentReader(store_path)
+    store_root = "tests/store/test.rs"
+    store_paths = find_store_paths(store_root)
+    print(f"Found store paths: {store_paths}")
+    
+    reader = ExperimentReader(store_paths)
 
     confs = reader.get_confs(prob_size="[1000, 1000]", batch_id=1)
 

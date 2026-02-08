@@ -7,23 +7,16 @@
 import os
 import pandas as pd
 from metascribe.rocks_store import RocksStore
+from .experiment_store import ExperimentReader
+from .synthesis_store import SynthesisWriter
+from linnea_inspector.object_context import ObjectContext
+from linnea_inspector.dfg.context import DFGContext
 
 
 
 import logging
 logger = logging.getLogger(__name__)
 
-def get_experiment_db_path(run_config, store_path, db_folder):
-    try:
-        language = run_config['language']
-        expr = run_config['expr']
-        cluster_name = run_config['cluster_name']
-        aarch = run_config['aarch']
-    except KeyError as e:
-        raise KeyError(f"Missing expected keys in run_config: {e}")
-    
-    db_path = os.path.join(store_path, language, expr, cluster_name, aarch, db_folder)
-    return db_path
 
 def delete_experiment(run_config):
     store_path = run_config['store_path']
@@ -42,7 +35,7 @@ def delete_experiment(run_config):
     
     delete_algs = False
     #1) delete case_md and activity_log from RocksDB
-    db_path = get_experiment_db_path(run_config, store_path, db_folder="logs")
+    db_path = os.path.join(store_path, "logs")
     with RocksStore(db_path, lock=True, lock_timeout=300) as store:
         case_md_key = f"/case_md/{n_threads}/{problem_size}/{batch_id}"
         try:
@@ -98,7 +91,7 @@ def delete_experiment(run_config):
             
             logger.info(f"Deleted synthesis contexts with prefix {prefix} from {synthesis_db_path}")    
         
-        algs_db_path = get_experiment_db_path(run_config, store_path, db_folder="algorithms")
+        algs_db_path = os.path.join(store_path, "algorithms")
         
         with RocksStore(algs_db_path, lock=True, lock_timeout=300) as store:
             algs_prefix = f"/algorithms/{problem_size}"
@@ -115,10 +108,7 @@ def delete_experiment(run_config):
     
     
 def update_synthesis(run_config):
-    from .experiment_store import ExperimentReader
-    from .synthesis_store import SynthesisWriter
-    from linnea_inspector.object_context import ObjectContext
-    from linnea_inspector.dfg.context import DFGContext
+
 
     store_path = run_config['store_path']
     reader = ExperimentReader([store_path,])
@@ -142,7 +132,8 @@ def update_synthesis(run_config):
 
     dfg_context = DFGContext(activity_log, obj_context.data, obj_key='alg', compute_ranks=True)
     
-    synthesis_writer = SynthesisWriter(store_path)
+    synthesis_db_path = os.path.join(store_path, "synthesis")
+    synthesis_writer = SynthesisWriter(synthesis_db_path)
     synthesis_writer.write_context(
         class_name="f_call",
         object_context_data=obj_context.data,

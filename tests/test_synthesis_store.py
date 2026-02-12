@@ -55,7 +55,7 @@ def test_write(store_root):
         language=confs[0]['language'],
         expr=confs[0]['expr'],
         cluster_name=confs[0]['cluster_name'],
-        aarch=confs[0]['aarch'],
+        arch=confs[0]['arch'],
         n_threads=confs[0]['nthreads'],
         problem_size=confs[0]['prob_size']
     )
@@ -82,7 +82,7 @@ def test_read(store_root):
         language=config['language'],
         expr=config['expr'],
         cluster_name=config['cluster_name'],
-        aarch=config['aarch'],
+        arch=config['arch'],
         n_threads=config['nthreads'],
         problem_size=config['prob_size']
     )

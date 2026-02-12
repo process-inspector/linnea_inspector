@@ -38,7 +38,8 @@
                     <td>
                         <a href="{{ url_for('inspector.facts_algorithms', language=row['language'],
                             expr=row['expr'], cluster_name=row['cluster_name'],
-                            aarch=row['aarch'], nthreads=row['nthreads'],
+                            arch=row['arch'], nthreads=row['nthreads'],
+                            precision=row['precision'],
                             prob_size=row['prob_size']) }}" class="btn btn-secondary btn-sm">
                             show
                         </a>

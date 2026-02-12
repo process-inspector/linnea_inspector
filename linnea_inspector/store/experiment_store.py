@@ -18,7 +18,7 @@ def get_store_path(store_root, run_config):
         language = run_config['language']
         expr = run_config['expr']
         cluster_name = run_config['cluster_name']
-        aarch = run_config['aarch']
+        aarch = run_config['arch']
     except KeyError as e:
         raise KeyError(f"Missing expected keys in run_config: {e}")
     
@@ -36,12 +36,13 @@ def find_store_paths(store_root):
 
 class ExperimentWriter:
 
-    def __init__(self, store_root, run_config,  lock_timeout=300, force_open=False):
+    def __init__(self, store_path, run_config,  lock_timeout=300, force_open=False):
         
-        self.store_root = store_root
+        # self.store_root = store_root
         
         self.run_config = run_config
-        self.store_path = get_store_path(store_root, run_config)
+        # self.store_path = get_store_path(store_root, run_config)
+        self.store_path = store_path
         
         if not os.path.exists(self.store_path):
             os.makedirs(self.store_path, exist_ok=True)

@@ -77,11 +77,11 @@ def delete_experiment(run_config):
         lang = run_config['language']
         expr = run_config['expr']
         cluster_name = run_config['cluster_name']
-        aarch = run_config['aarch']
+        arch = run_config['arch']
         
         with RocksStore(synthesis_db_path, lock=True, lock_timeout=300) as store:
             
-            prefix = f"/contexts/{class_name}/{lang}/{expr}/{cluster_name}/{aarch}/{str(n_threads)}/{str(problem_size)}/"
+            prefix = f"/contexts/{class_name}/{lang}/{expr}/{cluster_name}/{arch}/{str(n_threads)}/{str(problem_size)}/"
             keys_to_delete = [key for key in store._store.keys() if key.startswith(prefix)]
             for key in keys_to_delete:
                 try:
@@ -117,7 +117,7 @@ def update_synthesis(run_config):
         language=run_config['language'],
         expr=run_config['expr'],
         cluster_name=run_config['cluster_name'],
-        aarch=run_config['aarch'],
+        arch=run_config['arch'],
         nthreads=run_config['nthreads'],
         prob_size=run_config['prob_size'])
     
@@ -142,7 +142,7 @@ def update_synthesis(run_config):
         language=run_config['language'],
         expr=run_config['expr'],
         cluster_name=run_config['cluster_name'],
-        aarch=run_config['aarch'],
+        arch=run_config['arch'],
         n_threads=run_config['nthreads'],
         problem_size=run_config['prob_size']
     )

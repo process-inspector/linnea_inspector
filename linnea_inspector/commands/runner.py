@@ -3,14 +3,16 @@ import shutil
 import json
 
 def add_parser(subparsers):
-    p = subparsers.add_parser('runner', help='Generate run scripts for the generated algs.')
-    p.add_argument("--gen_dir", required=True, help="Path to the generation directory containing gen_config.json and generated algorithms.")
+    p = subparsers.add_parser('runner',
+                              usage="linnea-inspector runner --generation_dir <dir> --run_template <template_file> --nthreads <num_threads> [--nreps <num_repetitions>]", 
+                              help='Generate run scripts for the generated algs.')
+    p.add_argument("--generation_dir", required=True, help="Path to the generation directory containing gen_config.json and generated algorithms.")
     p.add_argument("--run_template", required=True, help="Path to the run script template file.")
     p.add_argument("--nthreads", required=True, help="Number of threads to use when running the algorithms.")
     p.add_argument("--nreps", required=False, default=10, help="Number of repetitions for each algorithm run.")
     
 def runner(args):
-    gen_dir = args.gen_dir
+    gen_dir = args.generation_dir
     run_template = args.run_template
     nthreads = args.nthreads
     nreps = args.nreps
@@ -29,9 +31,9 @@ def runner(args):
         ]
         
     except Exception as e:
-        raise ValueError(f"Error reading generation configuration: {e}")
+        raise ValueError(f"Error reading generation configuration or run_template file: {e}")
     
-    run_dir = os.path.join(gen_dir, "runs")
+    run_dir = os.path.join(gen_dir, f"runs_{nthreads}threads_{nreps}reps")
     if os.path.exists(run_dir):
         shutil.rmtree(run_dir)
     os.makedirs(run_dir)
@@ -71,11 +73,19 @@ def runner(args):
     os.chmod(run_script_path, 0o755)
     
     run_config = {
+        "language": gen_config["language"],
+        "precision": gen_config["precision"],
         "expr": gen_config["expr_name"],
+        "equation": gen_config["equation"],
+        "eqn_input": gen_config["eqn_input"],
+        "eqn_output": gen_config["eqn_output"],
         "prob_size": "+".join([f"{k}_eq_{v}" for k, v in prob_size.items()]),
         "nthreads": nthreads,
         "niter": nreps,
         "alg_codes_path": os.path.abspath(os.path.join(gen_dir, "Julia/generated")),
+        "num_algs_limit": gen_config["num_algs_limit"],
+        "pruning_factor": gen_config["pruning_factor"],
+        "gen_time_limit_sec": gen_config["gen_time_limit_sec"]
     }
     
     with open(os.path.join(run_dir, "_run_config.json"), 'w') as f:

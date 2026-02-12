@@ -6,7 +6,8 @@ def prepare_facts_table_algs(df):
         {"id": "language", "label": "Language", "type": "string"},
         {"id": "expr", "label": "Expression", "type": "string"},
         {"id": "cluster_name", "label": "Cluster", "type": "string"},
-        {"id": "aarch", "label": "Arch", "type": "string"},
+        {"id": "arch", "label": "Arch", "type": "string"},
+        {"id": "precision", "label": "Precision", "type": "string"},
         {"id": "nthreads", "label": "N. Threads", "type": "integer"},
         {"id": "prob_size", "label": "Problem Size", "type": "string"}
     ]
@@ -23,13 +24,14 @@ def prepare_facts_table_algs(df):
     return ret
         
 
-def get_alg_code(alg_name, language, expr, cluster_name, aarch, n_threads, problem_size):
+def get_alg_code(alg_name, language, expr, cluster_name, arch, precision, n_threads, problem_size):
     reader = config.get_reader()
     confs = reader.get_confs(
         language=language,
         expr=expr,
         cluster_name=cluster_name,
-        aarch=aarch,
+        arch=arch,
+        precision=precision,
         nthreads=int(n_threads),
         prob_size=problem_size
     )

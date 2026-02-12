@@ -56,7 +56,11 @@
                     </tr>
                     <tr>
                         <th style="text-align: left; padding-right: 15px;">Architecture</th>
-                        <td>{{ aarch }}</td>
+                        <td>{{ arch }}</td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: left; padding-right: 15px;">Precision</th>
+                        <td>{{ precision }}</td>
                     </tr>
                     <tr>
                         <th style="text-align: left; padding-right: 15px;">Number of Threads</th>
@@ -132,7 +136,7 @@
                         {% if col.id == 'obj' %}
                             <td>
                             <a target="_blank" rel="noopener noreferrer" href="{{ url_for('inspector.algorithm_code', alg_name=row[col.id], language=language,
-                                expr=expr, cluster_name=cluster_name, aarch=aarch, nthreads=nthreads,
+                                expr=expr, cluster_name=cluster_name, arch=arch, precision=precision, nthreads=nthreads,
                                 prob_size=prob_size) }}">
                                 {{ row[col.id] }}
                             </a>

@@ -1,8 +1,5 @@
 {
-  "expr_name": "GLS",
-  "equations_file": "tests/generation/gls/equations.py",
-  "generation_dir": "tests/generation/gls/linnea_codes",
   "num_algs_limit": 10,
   "gen_time_limit_sec": 60,
-  "pruning_factor": 1.0
+  "pruning_factor": 1.2
 }

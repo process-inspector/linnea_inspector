@@ -28,13 +28,14 @@ class SynthesisWriter:
                         language="",
                         expr="",
                         cluster_name="",
-                        aarch="",
+                        arch="",
+                        precision="",
                         n_threads="",
                         problem_size=""):
         
         
         with RocksStore(self.store_path, lock=True, lock_timeout=self.lock_timeout, force_open=self.force_open) as store:
-            key = os.path.join("/contexts", class_name,  language, expr, cluster_name, aarch, str(n_threads), str(problem_size))
+            key = os.path.join("/contexts", class_name,  language, expr, cluster_name, arch, precision, str(n_threads), str(problem_size))
             
             obj_key = f"{key}/object"
             activity_key = f"{key}/activity"
@@ -60,13 +61,14 @@ class SynthesisReader:
                     language="",
                     expr="",
                     cluster_name="",
-                    aarch="",
+                    arch="",
+                    precision="",
                     n_threads="",
                     problem_size=""):
         
         
         with RocksStore(self.store_path, lock=False) as store:
-            key = os.path.join("/contexts", class_name, language, expr, cluster_name, aarch, str(n_threads), str(problem_size))
+            key = os.path.join("/contexts", class_name, language, expr, cluster_name, arch, precision, str(n_threads), str(problem_size))
                         
             obj_key = f"{key}/object"
             activity_key = f"{key}/activity"

@@ -47,6 +47,7 @@ class ExperimentWriter:
         if not os.path.exists(self.store_path):
             os.makedirs(self.store_path, exist_ok=True)
         
+        self.run_config['store_path'] = self.store_path
               
         try:
             self.n_threads = self.run_config['nthreads']
@@ -68,7 +69,7 @@ class ExperimentWriter:
         assert self.run_config is not None, "run_config must be provided to write run configuration."
         
         config_record = {f"{key}":f"{str(value)}" for key, value in self.run_config.items()}
-        config_record['store_path'] = self.store_path
+        # config_record['store_path'] = self.store_path
         # config_record['db_path'] = get_experiment_db_path(self.run_config, self.store_root, db_folder="logs")
         # config_record['algs_db_path'] = get_experiment_db_path(self.run_config, self.store_root, db_folder="algorithms")
               

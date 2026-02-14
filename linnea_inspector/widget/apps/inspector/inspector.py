@@ -53,7 +53,7 @@ def facts_index():
 @bp.route('/facts/algorithms/<language>/<expr>/<cluster_name>/<arch>/<precision>/<nthreads>/<prob_size>')
 def facts_algorithms(language, expr, cluster_name, arch, precision, nthreads, prob_size):
     try:
-        dfg_svg, node_info, object_info = synthesis_handler.get_facts_algs(language, expr, cluster_name, arch, nthreads, prob_size)
+        dfg_svg, node_info, object_info = synthesis_handler.get_facts_algs(language, expr, cluster_name, arch, precision, nthreads, prob_size)
     except KeyError as e:
         ## TODO: may be try by getting the activity log..
         return render_template(f'{name}/error.html', message=str(e))

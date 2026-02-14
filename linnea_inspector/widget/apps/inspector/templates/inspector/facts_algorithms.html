@@ -44,7 +44,7 @@
                     </tr>
                     <tr>
                         <th style="text-align: left; padding-right: 15px;">Problem Size</th>
-                        <td>{{ prob_size }}</td>
+                        <td class="prob_size">{{ prob_size }}</td>
                     </tr>
                 </table>
             </div>
@@ -153,5 +153,17 @@
         {% endcall %}
     {% endcall %}
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    const cells = document.querySelectorAll("td.prob_size");
+
+    cells.forEach(td => {
+        td.textContent = td.textContent
+        .replace(/_eq_/g, "=")
+        .replace(/\+/g, ", ");
+    });
+    });
+</script>
 
 {% endblock content %}

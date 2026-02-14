@@ -14,6 +14,10 @@ from linnea_inspector.object_context import ObjectContext
 from linnea_inspector.dfg.context import DFGContext
 from linnea_inspector.store.synthesis_store import SynthesisWriter
 
+from linnea_inspector.anomaly import is_anomaly
+
+import pandas as pd
+
 
 def add_parser(subparsers):
     p = subparsers.add_parser("process",
@@ -63,6 +67,8 @@ def perform_synthesis(config, trace_dir, store_dir):
         nthreads=int(config["nthreads"]),
     )
     
+    confs = [config,] + confs 
+    
     if not confs:
         logging.warning(f"No configurations found. Synthesis cannot be performed.")
         return
@@ -92,6 +98,23 @@ def perform_synthesis(config, trace_dir, store_dir):
         n_threads=config["nthreads"],
         problem_size=config["prob_size"]
     )
+    
+    anomaly = is_anomaly(obj_context.data)
+    if anomaly:
+        logging.info(f"Anomaly detected: {anomaly}")
+    config["anomaly"] = anomaly
+    # writer.write_run_config()
+    # writer.remove_duplicate_configs()
+    anomaly_path = os.path.join(writer.store_path, "run_stats.csv")
+    if os.path.exists(anomaly_path):
+        df = pd.read_csv(anomaly_path)
+        df = df.append(config, ignore_index=True)
+    else:
+        df = pd.DataFrame([config])
+    df.to_csv(anomaly_path, index=False)
+    
+    df = pd.read_csv(anomaly_path).drop_duplicates().reset_index(drop=True)
+    df.to_csv(anomaly_path, index=False)
     
     logging.info(f"Synthesis context written to synthesis store at {synth_store_path}")
     

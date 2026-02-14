@@ -32,7 +32,7 @@
                         {% if col.type == 'decimal' %}
                             <td>{{ row[col.id] | round(2) }}</td>
                         {% else %}
-                            <td>{{ row[col.id] }}</td>
+                            <td class="{{ col.id }}">{{ row[col.id] }}</td>
                         {% endif %}
                     {% endfor %}
                     <td>
@@ -49,4 +49,16 @@
             </tbody>
         {% endcall %}
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+        const cells = document.querySelectorAll("td.prob_size");
+
+        cells.forEach(td => {
+            td.textContent = td.textContent
+            .replace(/_eq_/g, "=")
+            .replace(/\+/g, ", ");
+        });
+        });
+    </script>
 {% endblock content %}

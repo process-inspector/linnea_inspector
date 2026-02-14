@@ -6,13 +6,14 @@ import re
 import os
 
 
-def get_facts_algs(language, expr, cluster_name, arch, n_threads, problem_size):
+def get_facts_algs(language, expr, cluster_name, arch, precision, n_threads, problem_size):
     reader = config.get_reader()
     confs = reader.get_confs(
         language=language,
         expr=expr,
         cluster_name=cluster_name,
         arch=arch,
+        precision=precision,
         nthreads=int(n_threads),
         prob_size=problem_size
     )
@@ -29,6 +30,7 @@ def get_facts_algs(language, expr, cluster_name, arch, n_threads, problem_size):
         expr=expr,
         cluster_name=cluster_name,
         arch=arch,
+        precision=precision,
         n_threads=n_threads,
         problem_size=problem_size
     )

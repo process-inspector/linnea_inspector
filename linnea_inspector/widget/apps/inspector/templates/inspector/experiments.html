@@ -18,6 +18,18 @@
             {{ df_macros.render_df_with_filters(col_schema, records, round=2) }}
         {% endcall %}
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+        const cells = document.querySelectorAll("td.prob_size");
+
+        cells.forEach(td => {
+            td.textContent = td.textContent
+            .replace(/_eq_/g, "=")
+            .replace(/\+/g, ", ");
+        });
+        });
+    </script>
 {% endblock content %}
 
 

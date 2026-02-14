@@ -38,9 +38,9 @@
                 <tr>
                     {% for col in col_schema %}
                         {% if col.type == 'decimal' %}
-                            <td>{{ row[col.id] | round(round) }}</td>
+                            <td class="{{ col.id }}">{{ row[col.id] | round(round) }}</td>
                         {% else %}
-                            <td>{{ row[col.id] }}</td>
+                            <td class="{{ col.id }}">{{ row[col.id] }}</td>
                         {% endif %}
                     {% endfor %}
                 </tr>
@@ -66,9 +66,9 @@
                 <tr>
                     {% for col in col_schema %}
                         {% if col.type == 'decimal' %}
-                            <td>{{ row[col.id] | round(round) }}</td>
+                            <td class="{{ col.id }}">{{ row[col.id] | round(round) }}</td>
                         {% else %}
-                            <td>{{ row[col.id] }}</td>
+                            <td class="{{ col.id }}">{{ row[col.id] }}</td>
                         {% endif %}
                     {% endfor %}
                 </tr>
@@ -97,9 +97,9 @@
                     <td><input type="checkbox" class="tvst-select" value="{{ row[pk] }}"></td>
                     {% for col in col_schema %}
                         {% if col.type == 'decimal' %}
-                            <td>{{ row[col.id] | round(round) }}</td>
+                            <td class="{{ col.id }}">{{ row[col.id] | round(round) }}</td>
                         {% else %}
-                            <td>{{ row[col.id] }}</td>
+                            <td class="{{ col.id }}">{{ row[col.id] }}</td>
                         {% endif %}
                     {% endfor %}
                 </tr>

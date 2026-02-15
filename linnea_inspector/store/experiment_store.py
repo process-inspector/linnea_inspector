@@ -9,6 +9,7 @@ import os
 import glob
 import pandas as pd
 from process_inspector.activity_log import ActivityLog
+from .config_manager import ConfigManager
 
 import logging
 logger = logging.getLogger(__name__)
@@ -59,6 +60,9 @@ class ExperimentWriter:
         
         self.lock_timeout = lock_timeout
         self.force_open = force_open
+        
+        self.config_manager = ConfigManager(self.store_path)
+        
         # Following data are added
         # /case_md/n_threads/problem_size/batch_id: df, each row-- alg, iter
         # /run_config, json dump of run_config without prob_size and n_threads keys
@@ -68,30 +72,7 @@ class ExperimentWriter:
     def write_run_config(self):
         assert self.run_config is not None, "run_config must be provided to write run configuration."
         
-        config_record = {f"{key}":f"{str(value)}" for key, value in self.run_config.items()}
-        # config_record['store_path'] = self.store_path
-        # config_record['db_path'] = get_experiment_db_path(self.run_config, self.store_root, db_folder="logs")
-        # config_record['algs_db_path'] = get_experiment_db_path(self.run_config, self.store_root, db_folder="algorithms")
-              
-        #read run_configs.csv at store_path.. create if not exists
-        run_configs_path = os.path.join(self.store_path, "run_configs.csv")
-        if os.path.exists(run_configs_path):
-            run_configs_df = pd.read_csv(run_configs_path)
-            run_configs_df = pd.concat([run_configs_df, pd.DataFrame([config_record])], ignore_index=True)
-            #run_configs_df = run_configs_df.drop_duplicates().reset_index(drop=True).. does not work..
-        else:
-            run_configs_df = pd.DataFrame([config_record])
-        
-        try:
-            run_configs_df.to_csv(run_configs_path, index=False)
-        except Exception as e:
-            raise IOError(f"Could not write run_configs.csv at {run_configs_path}: {e}")
-        
-    def remove_duplicate_configs(self):
-        run_configs_path = os.path.join(self.store_path, "run_configs.csv")
-        if os.path.exists(run_configs_path):
-            df = pd.read_csv(run_configs_path).drop_duplicates().reset_index(drop=True)
-            df.to_csv(run_configs_path, index=False)
+        self.config_manager.write_config(self.run_config)
         
     def write_case(self, case_md):
         assert self.run_config is not None, "run_config must be provided to write case metadata."

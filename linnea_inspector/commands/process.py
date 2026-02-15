@@ -34,7 +34,7 @@ def sanity_check_and_config(args):
     assert os.path.exists(config_path), f"Run configuration file {config_path} does not exist in trace directory."
     
     config = json.load(open(config_path, 'r'))
-    required_keys = ["cluster_name", "arch", "expr", "language", "precision", "equation", "eqn_input", "eqn_output", "prob_size", "nthreads", "niter"]
+    required_keys = ["cluster_name", "arch", "expr", "language", "precision", "prob_size", "nthreads"]
     for key in required_keys:
         assert key in config, f"Key {key} not found in run_config.json. Please ensure the generator command is run with the correct arguments to include all necessary information in the config."
         
@@ -49,7 +49,6 @@ def perform_synthesis(config, trace_dir, store_dir):
     writer = ExperimentWriter(store_dir, config)
     logging.info(f"Opened RS store at {writer.store_path}")
     writer.write_run_config()
-    writer.remove_duplicate_configs()
     writer.write_case(processor.case_md)
     writer.write_activity_log(activity_log)
     writer.write_algorithms()
@@ -83,38 +82,37 @@ def perform_synthesis(config, trace_dir, store_dir):
     dfg_context = DFGContext(activity_log, obj_context.data, obj_key='alg', compute_ranks=True)
     
     synth_store_path = os.path.join(writer.store_path, "synthesis")
-    synthesis_writer = SynthesisWriter(synth_store_path)
+    synthesis_writer = SynthesisWriter(synth_store_path, config)
     
     synthesis_writer.write_context(
         class_name="f_call",
         object_context_data=obj_context.data,
         activity_context_data=dfg_context.activity_data,
-        relation_context_data=dfg_context.relation_data,
-        language=config["language"],
-        expr=config["expr"],
-        cluster_name=config["cluster_name"],
-        arch=config["arch"],
-        precision=config["precision"],
-        n_threads=config["nthreads"],
-        problem_size=config["prob_size"]
+        relation_context_data=dfg_context.relation_data
     )
     
     anomaly = is_anomaly(obj_context.data)
     if anomaly:
         logging.info(f"Anomaly detected: {anomaly}")
-    config["anomaly"] = anomaly
-    # writer.write_run_config()
-    # writer.remove_duplicate_configs()
-    anomaly_path = os.path.join(writer.store_path, "run_stats.csv")
-    if os.path.exists(anomaly_path):
-        df = pd.read_csv(anomaly_path)
-        df = df.append(config, ignore_index=True)
-    else:
-        df = pd.DataFrame([config])
-    df.to_csv(anomaly_path, index=False)
     
-    df = pd.read_csv(anomaly_path).drop_duplicates().reset_index(drop=True)
-    df.to_csv(anomaly_path, index=False)
+    stats_data = {
+        "anomaly": anomaly,
+    }
+    synthesis_writer.write_stats(stats_data)
+    
+    # config["anomaly"] = anomaly
+    # # writer.write_run_config()
+    # # writer.remove_duplicate_configs()
+    # anomaly_path = os.path.join(writer.store_path, "run_stats.csv")
+    # if os.path.exists(anomaly_path):
+    #     df = pd.read_csv(anomaly_path)
+    #     df = df.append(config, ignore_index=True)
+    # else:
+    #     df = pd.DataFrame([config])
+    # df.to_csv(anomaly_path, index=False)
+    
+    # df = pd.read_csv(anomaly_path).drop_duplicates().reset_index(drop=True)
+    # df.to_csv(anomaly_path, index=False)
     
     logging.info(f"Synthesis context written to synthesis store at {synth_store_path}")
     

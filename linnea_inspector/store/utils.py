@@ -11,6 +11,9 @@ from .experiment_store import ExperimentReader
 from .synthesis_store import SynthesisWriter
 from linnea_inspector.object_context import ObjectContext
 from linnea_inspector.dfg.context import DFGContext
+from .config_manager import ConfigManager
+from linnea_inspector.anomaly import is_anomaly
+
 
 
 
@@ -61,16 +64,18 @@ def delete_experiment(run_config):
             delete_algs = True
     
     #2) delete entry from run_configs.csv
-    df = pd.read_csv(run_configs_path)
+    config_manager = ConfigManager(store_path)
+    config_manager.delete(**run_config)
+    # df = pd.read_csv(run_configs_path)
     
-    mask = True
-    for key, value in run_config.items():
-        if key not in ['store_path', 'db_path', 'algs_db_path', 'niter']:
-            mask &= (df[key] == value)
+    # mask = True
+    # for key, value in run_config.items():
+    #     if key not in ['store_path', 'db_path', 'algs_db_path', 'niter']:
+    #         mask &= (df[key] == value)
     
-    df = df[~mask].reset_index(drop=True)
+    # df = df[~mask].reset_index(drop=True)
     
-    df.to_csv(run_configs_path, index=False)
+    # df.to_csv(run_configs_path, index=False)
     
     synthesis_db_path = os.path.join(store_path, "synthesis")
     if delete_algs:
@@ -91,6 +96,12 @@ def delete_experiment(run_config):
             
             logger.info(f"Deleted synthesis contexts with prefix {prefix} from {synthesis_db_path}")    
         
+            stat_key = f"/stats/{lang}/{expr}/{cluster_name}/{arch}/{str(n_threads)}/{str(problem_size)}/"
+            try:
+                del store._store[stat_key]
+            except KeyError:
+                logger.warning(f"Synthesis stats key {stat_key} not found in the store at {synthesis_db_path}")
+                
         algs_db_path = os.path.join(store_path, "algorithms")
         
         with RocksStore(algs_db_path, lock=True, lock_timeout=300) as store:
@@ -108,7 +119,6 @@ def delete_experiment(run_config):
     
     
 def update_synthesis(run_config):
-
 
     store_path = run_config['store_path']
     reader = ExperimentReader([store_path,])
@@ -133,18 +143,17 @@ def update_synthesis(run_config):
     dfg_context = DFGContext(activity_log, obj_context.data, obj_key='alg', compute_ranks=True)
     
     synthesis_db_path = os.path.join(store_path, "synthesis")
-    synthesis_writer = SynthesisWriter(synthesis_db_path)
+    synthesis_writer = SynthesisWriter(synthesis_db_path, run_config)
     synthesis_writer.write_context(
         class_name="f_call",
         object_context_data=obj_context.data,
         activity_context_data=dfg_context.activity_data,
-        relation_context_data=dfg_context.relation_data,
-        language=run_config['language'],
-        expr=run_config['expr'],
-        cluster_name=run_config['cluster_name'],
-        arch=run_config['arch'],
-        n_threads=run_config['nthreads'],
-        problem_size=run_config['prob_size']
+        relation_context_data=dfg_context.relation_data
     )
+    
+    anomaly = is_anomaly(obj_context.data)
+    synthesis_writer.write_stats({
+        "anomaly": anomaly,
+    })
     
     logger.info("Synthesis context updated successfully.")

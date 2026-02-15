@@ -22,6 +22,8 @@ from linnea_inspector.dfg.ranks_perspective import DFGRanksPerspective
 
 from process_inspector.schemas import ObjectSchema, ActivitySchema, RelationSchema
 
+from linnea_inspector.anomaly import is_anomaly
+
 def test_write(store_root):
     store_paths = find_store_paths(store_root)
     reader = ExperimentReader(store_paths)
@@ -45,20 +47,25 @@ def test_write(store_root):
     
     # synth_store_path = get_experiment_db_path(confs[0], store_path[0], db_folder="synthesis")
     synth_store_path = os.path.join(store_paths[0], "synthesis")
-    synthesis_writer = SynthesisWriter(synth_store_path)
+    synth_conf = confs[0].copy()
+    # remove obj_key if the obj is other than alg
+    # synth_conf.pop('cluster_name', None)
+    
+    synthesis_writer = SynthesisWriter(synth_store_path, synth_conf)
     
     synthesis_writer.write_context(
         class_name="f_call",
         object_context_data=obj_context.data,
         activity_context_data=dfg_context.activity_data,
         relation_context_data=dfg_context.relation_data,
-        language=confs[0]['language'],
-        expr=confs[0]['expr'],
-        cluster_name=confs[0]['cluster_name'],
-        arch=confs[0]['arch'],
-        n_threads=confs[0]['nthreads'],
-        problem_size=confs[0]['prob_size']
     )
+    
+    anomaly = is_anomaly(obj_context.data)
+    stats_data = {
+        "anomaly": anomaly,
+    }
+    synthesis_writer.write_stats(stats_data)
+    
     print("SUCCESS") 
     
 def test_read(store_root):
@@ -75,16 +82,11 @@ def test_read(store_root):
     config = confs[0]
     
     synth_store_path = os.path.join(store_paths[0], "synthesis")
-    synthesis_reader = SynthesisReader(synth_store_path)
+    # remove obj_key from config if the obj is other than alg
+    synthesis_reader = SynthesisReader(synth_store_path, config)
     
     context_data = synthesis_reader.get_context(
-        class_name="f_call",
-        language=config['language'],
-        expr=config['expr'],
-        cluster_name=config['cluster_name'],
-        arch=config['arch'],
-        n_threads=config['nthreads'],
-        problem_size=config['prob_size']
+        class_name="f_call"
     )
     
     print("Object Context Data:")
@@ -103,6 +105,10 @@ def test_read(store_root):
     print(graph)
     
     graph.render(os.path.join('tests/dfgs/', 'dfg_ranks_synth_rs'), format='svg', cleanup=True)
+    
+    stats_data = synthesis_reader.get_stats()
+    print("Stats Data:")
+    print(stats_data)
     print("SUCCESS") 
     
 if __name__ == "__main__":

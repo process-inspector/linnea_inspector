@@ -9,5 +9,6 @@
   "alg_codes_path": "tests/algorithms",
   "batch_id": 1,
   "niter": 10,
-  "timestamp": "2024-06-15_12-00-00"
+  "timestamp": "2024-06-15_12-00-00",
+  "job_id": "L1"
 }

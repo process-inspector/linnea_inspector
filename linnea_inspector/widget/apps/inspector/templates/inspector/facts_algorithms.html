@@ -11,24 +11,31 @@
 <div class="container-fluid py-4">
     
     {% call card_macros.render_card_basic(
-        title='Fact details',
+        title='Fact details for Algorithms',
         header_class='tvst-card h5'
     ) %}
         <div class="row">
             <div class="col-md-4">
                 <table style="border-collapse: separate;">
                     <tr>
-                        <th style="text-align: left; padding-right: 15px;">Object</th>
-                        <td>Algorithms</td>
+                        <th style="text-align: left; padding-right: 15px;">Expression Tag</th>
+                        <td>{{ expr }}</td>
                     </tr>
                     <tr>
-                        <th style="text-align: left; padding-right: 15px;">Num. objects</th>
-                        <td>{{ object_info['objects']|length }}</td>
+                        <th style="text-align: left; padding-right: 15px;">Expression</th>
+                        <td> <code>{{ equation }}</code> </td>
                     </tr>
                     <tr>
-                        <td>
-                            <a href="#" class="btn btn-sm btn-secondary">NL report</a>
-                        </td>
+                        <th style="text-align: left; padding-right: 15px;">Input</th>
+                        <td> <code>{{ eqn_input }}</code>  </td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: left; padding-right: 15px;">Output</th>
+                        <td> <code>{{ eqn_output }}</code> </td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: left; padding-right: 15px;">Problem Size</th>
+                        <td><code> <span class="prob_size">{{ prob_size }}</span></code></td>
                     </tr>
                 </table>
             </div>
@@ -39,17 +46,13 @@
                         <td>{{ language }}</td>
                     </tr>
                     <tr>
-                        <th style="text-align: left; padding-right: 15px;">Expression</th>
-                        <td>{{ expr }}</td>
+                        <th style="text-align: left; padding-right: 15px;">Precision</th>
+                        <td>{{ precision }}</td>
                     </tr>
                     <tr>
-                        <th style="text-align: left; padding-right: 15px;">Problem Size</th>
-                        <td class="prob_size">{{ prob_size }}</td>
+                        <th style="text-align: left; padding-right: 15px;">Number of Threads</th>
+                        <td>{{ nthreads }}</td>
                     </tr>
-                </table>
-            </div>
-            <div class="col-md-4">
-                <table style="border-collapse: separate;">
                     <tr>
                         <th style="text-align: left; padding-right: 15px;">Cluster Name</th>
                         <td>{{ cluster_name }}</td>
@@ -58,13 +61,22 @@
                         <th style="text-align: left; padding-right: 15px;">Architecture</th>
                         <td>{{ arch }}</td>
                     </tr>
+                </table>
+            </div>
+            <div class="col-md-4">
+                <table style="border-collapse: separate;">
                     <tr>
-                        <th style="text-align: left; padding-right: 15px;">Precision</th>
-                        <td>{{ precision }}</td>
+                        <th style="text-align: left; padding-right: 15px;">Num. Algorithms</th>
+                        <td>{{ num_objs }}</td>
                     </tr>
                     <tr>
-                        <th style="text-align: left; padding-right: 15px;">Number of Threads</th>
-                        <td>{{ nthreads }}</td>
+                        <th style="text-align: left; padding-right: 15px;">Anomaly class</th>
+                        <td>{{ anomaly }}</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="#" class="btn btn-sm btn-secondary">NL report</a>
+                        </td>
                     </tr>
                 </table>
             </div>
@@ -156,7 +168,7 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-    const cells = document.querySelectorAll("td.prob_size");
+    const cells = document.querySelectorAll("span.prob_size");
 
     cells.forEach(td => {
         td.textContent = td.textContent

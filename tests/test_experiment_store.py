@@ -29,7 +29,6 @@ def test_write(log_dir):
     writer = ExperimentWriter(store_root, processor.run_config)
     logging.info(f"Opened RS store at {writer.store_path}")
     writer.write_run_config()
-    writer.remove_duplicate_configs()
     writer.write_case(processor.case_md)
     writer.write_activity_log(activity_log)
     writer.write_algorithms()

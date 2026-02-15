@@ -33,7 +33,7 @@ def init():
     
     df = READER.run_configs
     # add id col
-    df.insert(0, 'id', range(1, len(df) + 1))
+    # df.insert(0, 'id', range(1, len(df) + 1))
       
     logger.info(f"Config initialized with data path: {store_paths}")
     

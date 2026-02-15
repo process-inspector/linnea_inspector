@@ -9,6 +9,7 @@ def add_parser(subparsers):
     p.add_argument("--cluster_name", required=True, help="Name of the cluster where the run was executed.")
     p.add_argument("--arch", required=True, help="Architecture of the machine where the run was executed.")
     p.add_argument("--run_dir", required=True, help="Path to the run directory containing the _run_config.json and traces from experiment runs.")
+    p.add_argument("--job_id", required=True, help="Job ID for the run.")
     p.add_argument("--batch_id", required=False, type=int, default=0, help="Batch ID for the run, if applicable.")
 
 def sanity_check_and_register(args):
@@ -37,6 +38,7 @@ def sanity_check_and_register(args):
     
     run_config["cluster_name"] = args.cluster_name
     run_config["arch"] = args.arch
+    run_config["job_id"] = args.job_id
     run_config["batch_id"] = args.batch_id
     run_config["timestamp"] = datetime.now().isoformat()
     try:

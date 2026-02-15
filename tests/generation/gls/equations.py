@@ -5,7 +5,7 @@ from linnea.algebra.properties import Property
 name = "GLS"
 
 op_info = {
-    "input": "X: (n, m)",
+    "input": "X: (n, m); M: (n, n); y: (n, 1)",
     "output": "b: (m, 1)",
 }
 

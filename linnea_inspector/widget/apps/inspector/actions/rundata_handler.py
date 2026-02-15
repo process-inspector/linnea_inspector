@@ -1,5 +1,7 @@
     
 from .. import config
+from linnea_inspector.store.synthesis_store import SynthesisReader
+import os
 
 def prepare_facts_table_algs(df):
     col_schema = [
@@ -9,16 +11,25 @@ def prepare_facts_table_algs(df):
         {"id": "arch", "label": "Arch", "type": "string"},
         {"id": "precision", "label": "Precision", "type": "string"},
         {"id": "nthreads", "label": "N. Threads", "type": "integer"},
-        {"id": "prob_size", "label": "Problem Size", "type": "string"}
+        {"id": "prob_size", "label": "Problem Size", "type": "string"},
     ]
     
     df = df.copy()
-    df = df[[col['id'] for col in col_schema]]
+    df = df[[col['id'] for col in col_schema] + ['store_path']]
     # Remove duplicates
     df = df.drop_duplicates()
     
+    records = df.to_dict('records')
+    for record in records:
+        store_path = record.get('store_path')
+        synth_reader = SynthesisReader(os.path.join(store_path,"synthesis"), record)
+        stats_data = synth_reader.get_stats()
+        record['anomaly'] = int(stats_data.get('anomaly', -1))
+    
+    col_schema.append({"id": "anomaly", "label": "Anomaly Class", "type": "integer"})
+    
     ret = {
-        'records': df.to_dict('records'),
+        'records': records,
         'col_schema': col_schema
     }
     return ret

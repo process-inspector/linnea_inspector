@@ -5,7 +5,7 @@ logger = logging.getLogger(__name__)
 
 def prepare_experiments_table(df):
     col_schema = [
-        {"id": "id", "label": "ID", "type": "string"},
+        {"id": "job_id", "label": "Job ID", "type": "string"},
         {"id": "language", "label": "Language", "type": "string"},
         {"id": "expr", "label": "Expression", "type": "string"},
         {"id": "cluster_name", "label": "Cluster", "type": "string"},
@@ -26,16 +26,16 @@ def prepare_experiments_table(df):
     ret = {
         'records': df.to_dict('records'),
         'col_schema': col_schema,
-        'pk': 'id'
+        'pk': 'job_id'
     }
     return ret
 
 def delete_runs(ids, df):
     
     ids = [int(i) for i in ids]
-    to_delete = df[df['id'].isin(ids)]
+    to_delete = df[df['job_id'].isin(ids)]
     # drop column 'id' to match run_config structure
-    to_delete = to_delete.drop(columns=['id'])
+    to_delete = to_delete.drop(columns=['job_id'])
     confs = to_delete.to_dict('records')
     for conf in confs:
         delete_experiment(conf)

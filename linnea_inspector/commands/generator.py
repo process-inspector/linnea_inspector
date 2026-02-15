@@ -49,21 +49,16 @@ def add_parser(subparsers):
     p.add_argument("--generation_dir", required=True, help="Directory to store generated algorithms.")
     p.add_argument("--language", required=True, help="Programming language for the generated code (currently supports: Julia, ).")
     p.add_argument("--equations_file", required=True, help="Path to the equations file.")
-    p.add_argument("--config", required=False, help="Path to the configuration file.")
     p.add_argument("--expr_name", required=False, help="Name of the expression being generated. Default is to look for name variable in equations file.")
     p.add_argument("--precision", required=True, help="Precision for the generated code (currently supports: Float64, Float32).")
+    p.add_argument("--num_algs_limit", required=False, type=int, default=10, help="Maximum number of algorithms to generate. Default is 10.")
+    p.add_argument("--gen_time_limit_sec", required=False, type=int, default=60, help="Time limit in seconds for the generation process. Default is 60 seconds.")
+    p.add_argument("--pruning_factor", required=False, type=float, default=1.0, help="Pruning factor from linnea")
     p.add_argument("--overwrite", action='store_true', help="Whether to overwrite the generation directory if it already exists. Default is False.")
+    
 
 def sanity_check_and_configure(args, params):
     config = {}
-    if args.config:
-        config_path = args.config
-        if not os.path.exists(config_path):
-            raise ValueError(f"Configuration file {config_path} does not exist.")
-        try:
-            config = json.load(open(config_path, 'r'))
-        except Exception as e:
-            raise ValueError(f"Error loading configuration file: {e}")
     
     language = args.language
     if language not in ["Julia"]:
@@ -113,12 +108,7 @@ def sanity_check_and_configure(args, params):
     config['language'] = language
     config['precision'] = precision
     
-    if not "num_algs_limit" in config:
-        config["num_algs_limit"] = 10
-    if not "gen_time_limit_sec" in config:
-        config["gen_time_limit_sec"] = 60
-    if not "pruning_factor" in config:
-        config["pruning_factor"] = 1.0
+
         
     config['expr_name'] = expr_name
     config['generation_dir'] = args.generation_dir
@@ -128,7 +118,10 @@ def sanity_check_and_configure(args, params):
     config['eqn_output'] = eqn_output
     config['prob_size'] = prob_size
     config['generation_dir'] = args.generation_dir
-    
+
+    config['num_algs_limit'] = args.num_algs_limit
+    config['gen_time_limit_sec'] = args.gen_time_limit_sec
+    config['pruning_factor'] = args.pruning_factor  
     
     if os.path.exists(config['generation_dir']):
         if args.overwrite:

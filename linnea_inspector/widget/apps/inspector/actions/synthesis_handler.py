@@ -22,17 +22,11 @@ def get_facts_algs(language, expr, cluster_name, arch, precision, n_threads, pro
     
     store_path = confs[0]['store_path']
     synth_store_path = os.path.join(store_path, "synthesis")
-    synthesis_reader = SynthesisReader(synth_store_path)
+    synthesis_reader = SynthesisReader(synth_store_path, confs[0])
     
+  
     context_data = synthesis_reader.get_context(
-        class_name="f_call",
-        language=language,
-        expr=expr,
-        cluster_name=cluster_name,
-        arch=arch,
-        precision=precision,
-        n_threads=n_threads,
-        problem_size=problem_size
+        class_name="f_call"
     )
     
     activity_context_data = ActivitySchema.model_validate_json(context_data['activity'])
@@ -51,7 +45,23 @@ def get_facts_algs(language, expr, cluster_name, arch, precision, n_threads, pro
     node_info = _prepare_node_info_for_rendering(activity_context_data, obj_label="Algorithm")
     object_info = _prepare_object_info_for_rendering(object_context_data, obj_label="Algorithm")
     
-    return dfg_svg, node_info, object_info
+    fact_details = {}
+    fact_details['language'] = language
+    fact_details['expr'] = expr
+    fact_details['cluster_name'] = cluster_name
+    fact_details['arch'] = arch
+    fact_details['precision'] = precision
+    fact_details['nthreads'] = n_threads
+    fact_details['prob_size'] = problem_size
+    
+    fact_details['equation'] = confs[0].get('equation', 'N/A')
+    fact_details['eqn_input'] = confs[0].get('eqn_input', 'N/A')
+    fact_details['eqn_output'] = confs[0].get('eqn_output', 'N/A')
+    
+    fact_details['anomaly'] = synthesis_reader.get_stats().get('anomaly', -1)  
+    fact_details['num_objs'] = len(object_context_data.objects)
+
+    return dfg_svg, node_info, object_info, fact_details
 
             
     

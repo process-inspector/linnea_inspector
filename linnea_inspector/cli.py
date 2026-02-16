@@ -14,12 +14,12 @@ def main(argv=None):
 
     # run.add_parser(subparsers)
     # process.add_parser(subparsers)
-    subparsers.add_parser("inspector", help="Launch the Linnea Inspector web application.")
+    subparsers.add_parser("widget", help="Launch the Linnea Inspector web application.")
     subparsers.add_parser("store", help="Lauch the Linnea Inspector store web application.")
 
     args, params = parser.parse_known_args(argv)
 
-    if args.command == "inspector":
+    if args.command == "widget":
         from .widget.inspector import main as inspector_main
         inspector_main()
     elif args.command == "store":

@@ -2,6 +2,13 @@ from linnea.algebra.expression import Matrix, Vector, Equal, Times, Inverse, Tra
 from linnea.algebra.equations import Equations
 from linnea.algebra.properties import Property
 
+name = "GLS"
+
+op_info = {
+    "input": "X: (n, m); M: (n, n); y: (n, 1)",
+    "output": "b: (m, 1)",
+}
+
 def get_equations(m,n):
     
         m = int(m)
@@ -15,5 +22,4 @@ def get_equations(m,n):
         b = Vector("b", (m, 1))
 
         equations = Equations(Equal(b, Times(Inverse(Times(Transpose(X), Inverse(M), X ) ), Transpose(X), Inverse(M), y)))
-        
         return equations

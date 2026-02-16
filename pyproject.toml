@@ -25,8 +25,7 @@ dependencies = [
 ]
 
 [project.scripts]
-linnea-inspector = "linnea_inspector.widget.inspector:main"
-linnea-store = "linnea_inspector.widget.store:main"
+linnea-inspector = "linnea_inspector.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["."]

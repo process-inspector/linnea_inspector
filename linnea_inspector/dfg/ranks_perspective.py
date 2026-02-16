@@ -9,22 +9,25 @@ from process_inspector.dfg.base_perspective import DFGBasePerspective
 import numpy as np
 
 class DFGRanksPerspective(DFGBasePerspective):
-    def __init__(self, activity_context_data, relation_context_data, object_context_data):   
+    def __init__(self, ranking_method, activity_context_data, relation_context_data, object_context_data):
+        assert ranking_method in ['m1', 'm2', 'm3'], f"Unsupported ranking method: {ranking_method}"
+           
         super().__init__(activity_context_data.activities, relation_context_data.relations)
         
         self.activity_data = activity_context_data
         self.relation_data = relation_context_data
         self.total_objs = len(object_context_data.objects)
-        
+        self.ranking_method = ranking_method
     
     def create_style(self):
         # find max rank score for activities
-        max_activity_rank_score = max(record['rank_score'] for record in self.activity_data.records)    
-        max_edge_rank_score = max(record['rank_score'] for record in self.relation_data.records)
+        rank_score_key = f'rank_score_{self.ranking_method}'
+        max_activity_rank_score = max(record[rank_score_key] for record in self.activity_data.records)    
+        max_edge_rank_score = max(record[rank_score_key] for record in self.relation_data.records)
         
         for record in self.relation_data.records:
             edge = record['relation']
-            score = record['rank_score']
+            score = record[rank_score_key]
             self.edge_color[edge] = self._get_edge_color(max(0, score), 0.0, max_edge_rank_score)
             self.edge_penwidth[edge] = 1.0
             
@@ -35,7 +38,7 @@ class DFGRanksPerspective(DFGBasePerspective):
                 
         for record in self.activity_data.records:
             num_objs = len(self.activity_data.obj_records[record['activity']])
-            score = record['rank_score']
+            score = record[rank_score_key]
             
             label = f"{record['activity']} ({num_objs}/{self.total_objs})\n"
             if score != -1.0:
@@ -44,7 +47,7 @@ class DFGRanksPerspective(DFGBasePerspective):
             label += f"{record['flops_mean']:.2e} F @ {record['perf_mean']:.2f} GF/s"
             
             self.activity_label[record['activity']] = label
-            self.activity_color[record['activity']] = self._get_activity_color(max(0, record['rank_score']), 0.0, max_activity_rank_score)
+            self.activity_color[record['activity']] = self._get_activity_color(max(0, record[rank_score_key]), 0.0, max_activity_rank_score)
              
                  
     def _get_activity_color(self, trans_count, min_trans_count, max_trans_count):

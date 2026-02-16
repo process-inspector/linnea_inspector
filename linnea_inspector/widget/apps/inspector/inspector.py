@@ -50,12 +50,12 @@ def facts_index():
                            records=data['records']
                            )
     
-@bp.route('/facts/algorithms/<language>/<expr>/<cluster_name>/<arch>/<precision>/<nthreads>/<prob_size>')
-def facts_algorithms(language, expr, cluster_name, arch, precision, nthreads, prob_size):
+@bp.route('/facts/algorithms/<ranking_method>/<language>/<expr>/<cluster_name>/<arch>/<precision>/<nthreads>/<prob_size>')
+def facts_algorithms(ranking_method, language, expr, cluster_name, arch, precision, nthreads, prob_size):
     try:
-        dfg_svg, node_info, object_info, fact_details = synthesis_handler.get_facts_algs(language, expr, cluster_name, arch, precision, nthreads, prob_size)
-    except KeyError as e:
-        ## TODO: may be try by getting the activity log..
+        dfg_svg, node_info, object_info, fact_details = synthesis_handler.get_facts_algs(ranking_method, language, expr, cluster_name, arch, precision, nthreads, prob_size)
+    except Exception as e:
+        # TODO: may be try by getting the activity log..
         return render_template(f'{name}/error.html', message=str(e))
     
     return render_template(f'{name}/facts_algorithms.html',

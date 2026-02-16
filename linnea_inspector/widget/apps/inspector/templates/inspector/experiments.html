@@ -13,7 +13,7 @@
         {% call dt_macros.render_dt(
             table_id='runs_table',
             table_class='tvst-table display',
-            page_length=5,
+            page_length=25,
         ) %}
             {{ df_macros.render_df_with_filters(col_schema, records, round=2) }}
         {% endcall %}

@@ -35,21 +35,22 @@ def test_store(store_path):
     import pandas as pd
     print(pd.DataFrame(obj_context.data.records))
     print("Anomaly:")
-    print(is_anomaly(obj_context.data))
+    ranking_method = 'm1'
+    print(is_anomaly(ranking_method, obj_context.data))
     
     df = pd.DataFrame(obj_context.data.records)
     df.loc[df['obj'] == 'algorithm10', 'flops_mean'] = 444886666.6666667
     print(df)
     print("Anomaly:")
     obj_context.data.records = df.to_dict(orient='records')
-    print(is_anomaly(obj_context.data))
+    print(is_anomaly(ranking_method, obj_context.data))
     
     df = pd.DataFrame(obj_context.data.records)
     df.loc[df['obj'] == 'algorithm0', 'flops_mean'] = 445886666.6666667
     print(df)
     print("Anomaly:")
     obj_context.data.records = df.to_dict(orient='records')
-    print(is_anomaly(obj_context.data))
+    print(is_anomaly(ranking_method, obj_context.data))
     
     print("SUCCESS")
     

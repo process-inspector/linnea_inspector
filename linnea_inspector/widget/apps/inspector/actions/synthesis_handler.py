@@ -6,7 +6,7 @@ import re
 import os
 
 
-def get_facts_algs(language, expr, cluster_name, arch, precision, n_threads, problem_size):
+def get_facts_algs(ranking_method, language, expr, cluster_name, arch, precision, n_threads, problem_size):
     reader = config.get_reader()
     confs = reader.get_confs(
         language=language,
@@ -33,7 +33,8 @@ def get_facts_algs(language, expr, cluster_name, arch, precision, n_threads, pro
     relation_context_data = RelationSchema.model_validate_json(context_data['relation'])
     object_context_data = ObjectSchema.model_validate_json(context_data['object'])
 
-    dfg_perspective = DFGRanksPerspective(activity_context_data, 
+    dfg_perspective = DFGRanksPerspective(ranking_method,
+                                          activity_context_data, 
                                           relation_context_data,
                                           object_context_data)
     
@@ -42,8 +43,8 @@ def get_facts_algs(language, expr, cluster_name, arch, precision, n_threads, pro
     
     dfg_svg = graph.pipe(format='svg').decode('utf-8')
     
-    node_info = _prepare_node_info_for_rendering(activity_context_data, obj_label="Algorithm")
-    object_info = _prepare_object_info_for_rendering(object_context_data, obj_label="Algorithm")
+    node_info = _prepare_node_info_for_rendering(ranking_method, activity_context_data, obj_label="Algorithm")
+    object_info = _prepare_object_info_for_rendering(ranking_method, object_context_data, obj_label="Algorithm")
     
     fact_details = {}
     fact_details['language'] = language
@@ -58,16 +59,21 @@ def get_facts_algs(language, expr, cluster_name, arch, precision, n_threads, pro
     fact_details['eqn_input'] = confs[0].get('eqn_input', 'N/A')
     fact_details['eqn_output'] = confs[0].get('eqn_output', 'N/A')
     
-    fact_details['anomaly'] = synthesis_reader.get_stats().get('anomaly', -1)  
+    stats_data = synthesis_reader.get_stats()
+    anomoaly_m1 = stats_data.get('anomaly_m1', -1)
+    anomoaly_m3 = stats_data.get('anomaly_m3', -1)
+
+    fact_details['ranking_method'] = ranking_method        
+    fact_details['anomaly'] = f"m1: {anomoaly_m1} / m3: {anomoaly_m3}"
     fact_details['num_objs'] = len(object_context_data.objects)
 
     return dfg_svg, node_info, object_info, fact_details
 
             
     
-def _prepare_node_info_for_rendering(activity_context_data, obj_label):
+def _prepare_node_info_for_rendering(ranking_method, activity_context_data, obj_label):
     col_schema = [
-        {"id": "rank", "label": "Rank", "type": "integer"},
+        {"id": f"rank_{ranking_method}", "label": f"Rank ({ranking_method})", "type": "integer"},
         {"id": "obj", "label": obj_label, "type": "string"},
         {"id": "flops_mean", "label": "FLOPS", "type": "decimal"},
         {"id": "perf_mean", "label": "Avg Performance (GFLOPS/s)", "type": "decimal"},
@@ -79,18 +85,18 @@ def _prepare_node_info_for_rendering(activity_context_data, obj_label):
         "node_records": activity_context_data.obj_records,
         "pk": "obj",
         "bp_data": activity_context_data.obj_bp_data,
-        "ranks": activity_context_data.obj_rank,
+        "ranks": activity_context_data.obj_rank[ranking_method],
         "bp_title": "Performance",
         "bp_x_label": "GFLOPS/s",
     }
     
     return node_info
 
-def _prepare_object_info_for_rendering(object_context_data, obj_label):
+def _prepare_object_info_for_rendering(ranking_method, object_context_data, obj_label):
     col_schema = [
-        {"id": "rank", "label": "Rank", "type": "integer"},
+        {"id": f"rank_{ranking_method}", "label": f"Rank ({ranking_method})", "type": "integer"},
         {"id": "obj", "label": obj_label, "type": "string"},
-        {"id": "flops_mean", "label": "GLOPS", "type": "decimal"},
+        {"id": "flops_mean", "label": "FLOPS", "type": "decimal"},
         {"id": "perf_mean", "label": "Avg Performance (GFLOPS/s)", "type": "decimal"},
     ]
     
@@ -101,7 +107,8 @@ def _prepare_object_info_for_rendering(object_context_data, obj_label):
         
     # in records, convert flops to GFLOPS
     for record in object_context_data.records:
-        record['flops_mean'] = record['flops_mean'] / 1e9
+        # record['flops_mean'] = record['flops_mean'] / 1e9
+        record['flops_mean'] = int(record['flops_mean'])
         
     object_info = {
         "objects": object_context_data.objects,
@@ -109,7 +116,7 @@ def _prepare_object_info_for_rendering(object_context_data, obj_label):
         "records": object_context_data.records,
         "pk": "obj",
         "bp_data": bp_data,
-        "ranks": object_context_data.rank,
+        "ranks": object_context_data.rank[ranking_method],
         "bp_x_label": "Duration (s)",
     }
     

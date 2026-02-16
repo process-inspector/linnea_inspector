@@ -48,7 +48,7 @@ class ExperimentWriter:
         if not os.path.exists(self.store_path):
             os.makedirs(self.store_path, exist_ok=True)
         
-        self.run_config['store_path'] = self.store_path
+        #self.run_config['store_path'] = self.store_path
               
         try:
             self.n_threads = self.run_config['nthreads']
@@ -149,7 +149,7 @@ class ExperimentReader:
                 raise FileNotFoundError(f"run_configs.csv not found at {run_configs_path}")
 
             df = pd.read_csv(run_configs_path)
-            # df['store_path'] = store_path
+            df['store_path'] = store_path
             run_configs.append(df)            
         
         self.run_configs = pd.DataFrame()
@@ -194,7 +194,7 @@ class ExperimentReader:
             
             key = f"/case_md/{n_threads}/{problem_size}/{batch_id}"
         
-            with RocksStore(db_path, lock=False) as store:
+            with RocksStore(db_path, lock=True, lock_timeout=self.lock_timeout) as store:
                 case_md = store.get_df(key)
             
             if case_md.empty:
@@ -235,7 +235,7 @@ class ExperimentReader:
             problem_size = config['prob_size']
             batch_id = config['batch_id']
               
-            with RocksStore(db_path, lock=False) as store:
+            with RocksStore(db_path, lock=True, lock_timeout=self.lock_timeout) as store:
                 prefix = f"/activity_log/{class_name}/{n_threads}/{problem_size}/{batch_id}"
                 rs_keys = [key for key in store._store.keys() if key.startswith(prefix)]
                 for key in rs_keys:
@@ -278,7 +278,7 @@ class ExperimentReader:
             raise FileNotFoundError(f"Algorithms RocksDB not found at {alg_db_path}")
         
         prob_size = config['prob_size']
-        with RocksStore(alg_db_path, lock=False) as store:
+        with RocksStore(alg_db_path, lock=True, lock_timeout=self.lock_timeout) as store:
             code_key = f"/algorithms/{prob_size}/{alg_name}"
             gen_steps_key = f"/generation_steps/{prob_size}/{alg_name}"
             try:

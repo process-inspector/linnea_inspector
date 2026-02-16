@@ -9,7 +9,7 @@
         {% call dt_macros.render_dt(
             table_id='runs_table',
             table_class='tvst-table display',
-            page_length=5,
+            page_length=25,
         ) %}
             <thead>
                 <tr>
@@ -36,7 +36,9 @@
                         {% endif %}
                     {% endfor %}
                     <td>
-                        <a href="{{ url_for('inspector.facts_algorithms', language=row['language'],
+                        <a href="{{ url_for('inspector.facts_algorithms', 
+                            ranking_method='m1',
+                            language=row['language'],
                             expr=row['expr'], cluster_name=row['cluster_name'],
                             arch=row['arch'], nthreads=row['nthreads'],
                             precision=row['precision'],

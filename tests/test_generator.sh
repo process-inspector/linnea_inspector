@@ -6,6 +6,6 @@ python -m linnea_inspector.cli generator \
         --language=Julia \
         --precision=Float64 \
         --equations_file=tests/generation/gls/equations.py \
-        --m 1000 -n 500 \
+        --m 2048 -n 128 \
         --expr_name=GLS \
         --overwrite

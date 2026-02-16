@@ -24,9 +24,11 @@ def prepare_facts_table_algs(df):
         store_path = record.get('store_path')
         synth_reader = SynthesisReader(os.path.join(store_path,"synthesis"), record)
         stats_data = synth_reader.get_stats()
-        record['anomaly'] = int(stats_data.get('anomaly', -1))
+        anomoaly_m1 = stats_data.get('anomaly_m1', -1)
+        anomoaly_m3 = stats_data.get('anomaly_m3', -1)
+        record['anomaly'] = f"{anomoaly_m1}/{anomoaly_m3}"
     
-    col_schema.append({"id": "anomaly", "label": "Anomaly Class", "type": "integer"})
+    col_schema.append({"id": "anomaly", "label": "Anomaly Class", "type": "string"})
     
     ret = {
         'records': records,

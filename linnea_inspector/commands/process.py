@@ -47,14 +47,14 @@ def perform_synthesis(config, trace_dir, store_dir):
     activity_log = ActivityLog(processor.event_log, f_call) 
         
     writer = ExperimentWriter(store_dir, config)
-    logging.info(f"Opened RS store at {writer.store_path}")
+    logging.info(f"Opened RS store at {store_dir}")
     writer.write_run_config()
     writer.write_case(processor.case_md)
     writer.write_activity_log(activity_log)
     writer.write_algorithms()
-    logging.info(f"Finished writing processed results to RS store at {writer.store_path}")
+    logging.info(f"Finished writing processed results to RS store at {store_dir}")
     
-    reader = ExperimentReader([writer.store_path,])
+    reader = ExperimentReader([store_dir,])
     
     confs = reader.get_confs(
         expr=config["expr"],
@@ -66,6 +66,7 @@ def perform_synthesis(config, trace_dir, store_dir):
         nthreads=int(config["nthreads"]),
     )
     
+    config['store_path'] = store_dir # add store path to config  for experiment_reader
     confs = [config,] + confs 
     
     if not confs:
@@ -77,7 +78,22 @@ def perform_synthesis(config, trace_dir, store_dir):
     # print(f"Case metadata: {case_md}")
     obj_context = ObjectContext(case_md, obj_key='alg', compute_ranks=True)
     
+    anomaly_m1 = is_anomaly('m1', obj_context.data)
+    anomaly_m2 = is_anomaly('m2', obj_context.data)
+    anomaly_m3 = is_anomaly('m3', obj_context.data)
+    
+    if anomaly_m1 != 2:
+        # only kee all alg with min flops in case_md and recompute object context
+        min_flops = case_md['flops'].min()
+        case_md = case_md[case_md['flops'] == min_flops]
+        obj_context = ObjectContext(case_md, obj_key='alg', compute_ranks=True)
+    
+    if anomaly_m1 or anomaly_m2 or anomaly_m3:
+        logging.info(f"Anomaly detected m1={anomaly_m1}, m2={anomaly_m2}, m3={anomaly_m3}")    
+    
     activity_log = reader.get_activity_log(confs, class_name="f_call")
+    ## keep only alg in object context
+    activity_log = activity_log.apply_filter(lambda record: record['alg'] in obj_context.data.objects)
 
     dfg_context = DFGContext(activity_log, obj_context.data, obj_key='alg', compute_ranks=True)
     
@@ -91,13 +107,13 @@ def perform_synthesis(config, trace_dir, store_dir):
         relation_context_data=dfg_context.relation_data
     )
     
-    anomaly = is_anomaly(obj_context.data)
-    if anomaly:
-        logging.info(f"Anomaly detected: {anomaly}")
-    
+
     stats_data = {
-        "anomaly": anomaly,
+        "anomaly_m1": anomaly_m1,
+        "anomaly_m2": anomaly_m2,
+        "anomaly_m3": anomaly_m3
     }
+    
     synthesis_writer.write_stats(stats_data)
     
     # config["anomaly"] = anomaly

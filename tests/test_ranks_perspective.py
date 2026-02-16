@@ -27,7 +27,9 @@ def test_lp(log_dir):
     
     dfg_context = DFGContext(activity_log, obj_context.data, obj_key='alg', compute_ranks=True)
     
-    dfg_perspective = DFGRanksPerspective(dfg_context.activity_data, 
+    ranking_method = 'm1'
+    dfg_perspective = DFGRanksPerspective(ranking_method,
+                                          dfg_context.activity_data, 
                                           dfg_context.relation_data,
                                           obj_context.data)
     
@@ -55,7 +57,9 @@ def test_store(store_path):
 
     dfg_context = DFGContext(activity_log, obj_context.data, obj_key='alg', compute_ranks=True)
     
-    dfg_perspective = DFGRanksPerspective(dfg_context.activity_data, 
+    ranking_method = 'm1'
+    dfg_perspective = DFGRanksPerspective(ranking_method,
+                                          dfg_context.activity_data, 
                                           dfg_context.relation_data,
                                           obj_context.data)
     

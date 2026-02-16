@@ -10,5 +10,8 @@
   "batch_id": 2,
   "niter": 10,
   "timestamp": "2024-06-15_12-00-00",
-  "job_id": "L2"
+  "job_id": "L2",
+  "equation": "b = ((X^T M^-1 X)^-1 X^T M^-1 y)",
+  "eqn_input": "X: (n, m); M: (n, n); y: (n, 1)",
+  "eqn_output": "b: (m, 1)"
 }

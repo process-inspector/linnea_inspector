@@ -32,7 +32,7 @@ class DFGContext(PMContextBase):
         records = []
         obj_records = {}
         obj_bp = {}
-        obj_rank = {}
+        obj_rank = {'m1': {}, 'm2': {}, 'm3': {}}
 
         for activity, df in node_data.items():
             # node_data does not contain __START__ and __END__
@@ -51,7 +51,10 @@ class DFGContext(PMContextBase):
             record['duration_mean'] = grouped['duration_sum'].mean()
             record['flops_mean'] = grouped['flops_sum'].mean()
             if self.compute_ranks:
-                record['rank_score'] = self._compute_rank_score(df[self.obj_key].unique().tolist(), self.obj_rank)
+                objs_in_activity = df[self.obj_key].unique().tolist()
+                record['rank_score_m1'] = self._compute_rank_score(objs_in_activity, self.obj_rank['m1'])
+                record['rank_score_m2'] = self._compute_rank_score(objs_in_activity, self.obj_rank['m2'])
+                record['rank_score_m3'] = self._compute_rank_score(objs_in_activity, self.obj_rank['m3'])
 
             _obj_bp = {}
             _obj_records = []
@@ -66,10 +69,15 @@ class DFGContext(PMContextBase):
                 _obj_bp[obj] = obj_df['perf_mean'].to_list()
                 
             if self.compute_ranks:
-                obj_rank[activity], perf_class = self._compute_partial_ranks(_obj_bp, invert=True)
-                record['perf_class'] = perf_class
+                pr = self._compute_partial_ranks(_obj_bp, invert=True)
+                record['perf_class'] = pr['nranks']
                 for obj_rec in _obj_records:
-                    obj_rec['rank'] = obj_rank[activity][obj_rec['obj']]
+                    obj_rec['rank_m1'] = pr['m1'][obj_rec['obj']]
+                    obj_rec['rank_m2'] = pr['m2'][obj_rec['obj']]
+                    obj_rec['rank_m3'] = pr['m3'][obj_rec['obj']]
+                obj_rank['m1'][activity] = pr['m1']
+                obj_rank['m2'][activity] = pr['m2']
+                obj_rank['m3'][activity] = pr['m3']
                 
             obj_bp[activity] = _obj_bp            
             records.append(record)            
@@ -97,7 +105,10 @@ class DFGContext(PMContextBase):
             record['relation'] = relation
             record['obj_count'] = df[_obj_key].nunique()
             if self.compute_ranks:
-                record['rank_score'] = self._compute_rank_score(df[_obj_key].unique().tolist(), self.obj_rank)
+                objs_in_relation = df[_obj_key].unique().tolist()
+                record['rank_score_m1'] = self._compute_rank_score(objs_in_relation, self.obj_rank['m1'])
+                record['rank_score_m2'] = self._compute_rank_score(objs_in_relation, self.obj_rank['m2'])
+                record['rank_score_m3'] = self._compute_rank_score(objs_in_relation, self.obj_rank['m3'])
                 
             records.append(record)
        

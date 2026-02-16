@@ -60,9 +60,13 @@ def test_write(store_root):
         relation_context_data=dfg_context.relation_data,
     )
     
-    anomaly = is_anomaly(obj_context.data)
+    anomaly_m1 = is_anomaly('m1', obj_context.data)
+    anomaly_m2 = is_anomaly('m2', obj_context.data)
+    anomaly_m3 = is_anomaly('m3', obj_context.data)
     stats_data = {
-        "anomaly": anomaly,
+        "anomaly_m1": anomaly_m1,
+        "anomaly_m2": anomaly_m2,
+        "anomaly_m3": anomaly_m3
     }
     synthesis_writer.write_stats(stats_data)
     
@@ -96,7 +100,9 @@ def test_read(store_root):
     relation_context_data = RelationSchema.model_validate_json(context_data['relation'])
     object_context_data = ObjectSchema.model_validate_json(context_data['object'])
 
-    dfg_perspective = DFGRanksPerspective(activity_context_data, 
+    ranking_method = 'm1'
+    dfg_perspective = DFGRanksPerspective(ranking_method,
+                                          activity_context_data, 
                                           relation_context_data,
                                           object_context_data)
     

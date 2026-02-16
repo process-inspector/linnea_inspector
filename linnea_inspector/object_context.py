@@ -35,14 +35,17 @@ class ObjectContext(ObjectContextBase):
             records.append(record)
             
         if self.compute_ranks:
-            obj_rank, perf_class = self._compute_partial_ranks(bp_data)
+            partial_ranks = self._compute_partial_ranks(bp_data)
+            obj_rank = partial_ranks
             for record in records:
-                record['rank'] = obj_rank[record['obj']]
+                record['rank_m1'] = obj_rank['m1'][record['obj']]
+                record['rank_m2'] = obj_rank['m2'][record['obj']]
+                record['rank_m3'] = obj_rank['m3'][record['obj']]
         
         self.data.objects = set(objects)               
         self.data.records = records
         self.data.bp_data = bp_data
         if self.compute_ranks:
             self.data.rank = obj_rank
-            self.data.perf_class = perf_class
+            self.data.perf_class = partial_ranks['nranks']
             

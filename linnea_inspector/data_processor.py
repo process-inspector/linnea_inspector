@@ -25,7 +25,8 @@ class LogsProcessor:
         if parse_run_config:
             run_config_path = os.path.join(self.log_dir, "run_config.json")
             assert os.path.isfile(run_config_path), f"Missing run_config.json in {self.log_dir}"
-            self._prepare_run_config(run_config_path)
+            with open(run_config_path, 'r') as f:
+                self.run_config = json.load(f)
         
         self.num_logs = 0
         self.files = []
@@ -34,28 +35,6 @@ class LogsProcessor:
         self.case_key = ['alg', 'iter']
         self.event_log = {}
         self.case_md = None   
-        
-    def _prepare_run_config(self, run_config_path):
-        
-        with open(run_config_path, 'r') as f:
-            run_config = json.load(f)
-            
-            try:
-                self.run_config['language'] = run_config['language']
-                self.run_config['expr'] = run_config['expr']
-                self.run_config['nthreads'] = run_config['nthreads']
-                self.run_config['cluster_name'] = run_config['cluster_name']
-                self.run_config['arch'] = run_config['arch']
-                self.run_config['precision'] = run_config['precision']
-                self.run_config['prob_size'] = run_config['prob_size']
-                self.run_config['batch_id'] = run_config['batch_id']
-                self.run_config['timestamp'] = run_config['timestamp']
-                self.run_config['niter'] = run_config['niter']
-                self.run_config['alg_codes_path'] = run_config['alg_codes_path']
-            except KeyError as e:
-                raise KeyError(f"Missing expected keys in run_config.json: {e}")         
-            
-            self.run_config['log_dir'] = self.log_dir
 
         
     def _prepare_files(self):

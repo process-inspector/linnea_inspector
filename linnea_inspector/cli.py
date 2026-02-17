@@ -1,5 +1,5 @@
 import argparse
-from .commands import generator, runner, register, process
+from .commands import generator, runner, register, process, clean
 
 def main(argv=None):
     
@@ -11,6 +11,7 @@ def main(argv=None):
     runner.add_parser(subparsers)
     register.add_parser(subparsers)
     process.add_parser(subparsers)
+    clean.add_parser(subparsers)
 
     # run.add_parser(subparsers)
     # process.add_parser(subparsers)
@@ -33,6 +34,8 @@ def main(argv=None):
         register.register(args)
     elif args.command == "process":
         process.process(args)
+    elif args.command == "clean":
+        clean.clean(args)
     else:
         raise ValueError(f"Unknown command: {args.command}")
     

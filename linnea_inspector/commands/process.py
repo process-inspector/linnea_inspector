@@ -4,6 +4,7 @@ import json
 import os
 import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 from linnea_inspector.data_processor import LogsProcessor
 from linnea_inspector.classifiers.f_call import f_call
@@ -47,12 +48,12 @@ def perform_synthesis(config, trace_dir, store_dir):
     activity_log = ActivityLog(processor.event_log, f_call) 
         
     writer = ExperimentWriter(store_dir, config)
-    logging.info(f"Opened RS store at {store_dir}")
+    logger.info(f"Opened RS store at {store_dir}")
     writer.write_run_config()
     writer.write_case(processor.case_md)
     writer.write_activity_log(activity_log)
     writer.write_algorithms()
-    logging.info(f"Finished writing processed results to RS store at {store_dir}")
+    logger.info(f"Finished writing processed results to RS store at {store_dir}")
     
     reader = ExperimentReader([store_dir,])
     
@@ -70,7 +71,7 @@ def perform_synthesis(config, trace_dir, store_dir):
     confs = [config,] + confs 
     
     if not confs:
-        logging.warning(f"No configurations found. Synthesis cannot be performed.")
+        logger.warning(f"No configurations found. Synthesis cannot be performed.")
         return
     
     # print(confs)
@@ -89,7 +90,7 @@ def perform_synthesis(config, trace_dir, store_dir):
         obj_context = ObjectContext(case_md, obj_key='alg', compute_ranks=True)
     
     if anomaly_m1 or anomaly_m2 or anomaly_m3:
-        logging.info(f"Anomaly detected m1={anomaly_m1}, m2={anomaly_m2}, m3={anomaly_m3}")    
+        logger.info(f"Anomaly detected m1={anomaly_m1}, m2={anomaly_m2}, m3={anomaly_m3}")    
     
     activity_log = reader.get_activity_log(confs, class_name="f_call")
     ## keep only alg in object context
@@ -130,7 +131,7 @@ def perform_synthesis(config, trace_dir, store_dir):
     # df = pd.read_csv(anomaly_path).drop_duplicates().reset_index(drop=True)
     # df.to_csv(anomaly_path, index=False)
     
-    logging.info(f"Synthesis context written to synthesis store at {synth_store_path}")
+    logger.info(f"Synthesis context written to synthesis store at {synth_store_path}")
     
 def process(args):
     

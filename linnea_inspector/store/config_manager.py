@@ -111,6 +111,7 @@ class ConfigManager:
             # only delete if mask if of instance pd.series
             if isinstance(mask, pd.Series):
                 df = df[~mask].reset_index(drop=True)
+            logger.info(f"Deleted configs matching conditions {conditions} from {self.run_configs_path}")
             df.to_csv(self.run_configs_path, index=False)
         except Exception as e:
             raise IOError(f"Failed to delete config from {self.run_configs_path}: {e}")

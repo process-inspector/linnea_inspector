@@ -2,11 +2,11 @@
 #SBATCH --job-name=linnea.gls
 #SBATCH --output=logs/%j.out
 #SBATCH --account=hpc2n2025-096
-#SBATCH --time=00:25:00
+#SBATCH --time=00:20:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=24
-#SBATCH --gpus-per-node=1
+#SBATCH --gpus-per-node=2
 
 
 ########################################
@@ -42,10 +42,10 @@ if [[ -z "$M" || -z "$N" ]]; then
 fi
 
 # makedir job_id
-GEN_DIR="generation/$SLURM_JOB_ID" 
+GEN_DIR="tests/generation/$SLURM_JOB_ID" 
+EQUATION_FILE="tests/generation/gls/equations.py"
+RUN_TEMPLATE="tests/generation/gls/run_template.jl"
 mkdir -p "$GEN_DIR"
-EQUATION_FILE="../../../equation.py"
-RUN_TEMPLATE="../../run_template.jl"
 
 source /proj/nobackup/aravind/LAAB/venvs/kebnekaise/activate.sh
 
@@ -76,7 +76,7 @@ srun -n 1 -c 24 ./run.sh
 
 linnea-inspector register --job_id="$SLURM_JOB_ID" --cluster_name=kebnekaise --arch=x86 --run_dir=.
 
-linnea-inspector process --trace_dir=./traces/ --store_dir=$THIS_DIR/data/store.rs
+linnea-inspector process --trace_dir=./traces/ --store_dir=$THIS_DIR/tests/store/store.sb
 
 cd $THIS_DIR
 rm -rf $GEN_DIR

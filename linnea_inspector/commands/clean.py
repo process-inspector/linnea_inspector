@@ -162,7 +162,9 @@ def clean_experiment_store(config_manager, args):
                             logger.warning(f"[!STORE.EXPERIMENT] Deleting activity log key for exp {key}.")
     
     
-
+        # do not delete configs that do not have exp. It is possible that synthesis is available.
+        logger.info("[COMPLETE] Experiment store cleanup completed.")
+        
 def clean(args):
     
     try:

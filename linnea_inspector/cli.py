@@ -1,5 +1,5 @@
 import argparse
-from .commands import generator, runner, register, process, clean
+from .commands import generator, runner, register, process, clean, sbatch
 
 def main(argv=None):
     
@@ -12,6 +12,7 @@ def main(argv=None):
     register.add_parser(subparsers)
     process.add_parser(subparsers)
     clean.add_parser(subparsers)
+    sbatch.add_parser(subparsers)
 
     # run.add_parser(subparsers)
     # process.add_parser(subparsers)
@@ -36,6 +37,8 @@ def main(argv=None):
         process.process(args)
     elif args.command == "clean":
         clean.clean(args)
+    elif args.command == "sbatch":
+        sbatch.sbatch(args, params)
     else:
         raise ValueError(f"Unknown command: {args.command}")
     

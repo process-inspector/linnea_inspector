@@ -19,6 +19,7 @@ classifiers = [
 
 # Equivalent to install_requires=open("requirements.txt").read().splitlines()
 dependencies = [
+    "linnea @ git+https://github.com/HPAC/linnea.git@traces",
     "process_inspector @ git+https://github.com/process-inspector/process_inspector.git",
     "metascribe @ git+https://github.com/mlr2d/metascribe.git",
     "flask"

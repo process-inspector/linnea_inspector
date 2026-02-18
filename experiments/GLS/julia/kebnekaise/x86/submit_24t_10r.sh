@@ -54,7 +54,7 @@ linnea-inspector generator \
         --language=Julia \
         --precision=Float64 \
         --equations_file=${EQUATION_FILE} \
-        --m "$M" -n "$N" \
+        --m "$M" --n "$N" \
         --expr_name=GLS \
         --num_algs_limit 15 \
         --gen_time_limit_sec 60 \

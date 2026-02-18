@@ -76,5 +76,5 @@ def algorithm_code(alg_name, language, expr, cluster_name, arch, precision, nthr
     
 @bp.route('/acknowledgemnts')
 def acknowledgements():
-    render_template(f'{name}/acknowledgements.html')
+    return render_template(f'{name}/acknowledgements.html')
     

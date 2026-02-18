@@ -73,7 +73,7 @@ class SynthesisReader:
     def get_context(self, class_name):
         
         
-        with RocksStore(self.store_path, lock=False) as store:
+        with RocksStore(self.store_path, lock=True) as store:
             key = os.path.join("/contexts", class_name, self.language, self.expr, self.cluster_name, self.arch, self.precision, self.nthreads, self.prob_size)
                         
             obj_key = f"{key}/object"
@@ -94,7 +94,7 @@ class SynthesisReader:
             
             
     def get_stats(self):
-        with RocksStore(self.store_path, lock=False) as store:
+        with RocksStore(self.store_path, lock=True) as store:
             key = os.path.join("/stats", self.language, self.expr, self.cluster_name, self.arch, self.precision, self.nthreads, self.prob_size)
             try:
                 stats_data = store.get_json(key)

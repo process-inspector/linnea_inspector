@@ -73,3 +73,8 @@ def algorithm_code(alg_name, language, expr, cluster_name, arch, precision, nthr
                             gen_steps=gen_steps,
                             **request.view_args
                            )
+    
+@bp.route('/acknowledgemnts')
+def acknowledgements():
+    render_template(f'{name}/acknowledgements.html')
+    

@@ -48,12 +48,12 @@ SPDX-License-Identifier: AGPL-3.0-or-later
     <li class="nav-item">
         <a class="nav-link" href="{{ url_for('inspector.facts_index') }}">Facts</a>
     </li>
-    <li class="nav-item">
+    <!-- <li class="nav-item">
         <a class="nav-link" href="#">Prescribe</a>
     </li>
     <li class="nav-item">
         <a class="nav-link" href="#">Predict</a>
-    </li>
+    </li> -->
 
 {% endblock navbar_left %}
 
@@ -75,7 +75,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
     &copy; 2026 Aravind Sankaran
     </div>
     <div>
-        <a href="#" class="btn btn-sm btn-link text-white link-light">Acknowledgements</a>
+        <a href="{{ url_for('inspector.acknowledgements') }}" class="btn btn-sm btn-link text-white link-light">Acknowledgements</a>
     </div>
 </div>
 {% endblock footer %}

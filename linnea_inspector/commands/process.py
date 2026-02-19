@@ -137,13 +137,13 @@ def process(args):
     
     try:
         config = sanity_check_and_config(args)
-        print(f"Processing trace files in {args.trace_dir} with configuration: {config}")
-        print(f"Storing processed results in {args.store_dir}")
+        logger.info(f"Processing trace files in {args.trace_dir} with configuration: {config}")
+        logger.info(f"Storing processed results in {args.store_dir}")
         perform_synthesis(config, args.trace_dir, args.store_dir)
         
     except AssertionError as ae:
-        print(f"Sanity check failed: {ae}")
-        return 
+        logger.error(f"Sanity check failed: {ae}")
+        raise
     # except Exception as e:
     #     print(f"Error during processing: {e}")
     #     return

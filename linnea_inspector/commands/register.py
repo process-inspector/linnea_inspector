@@ -1,6 +1,9 @@
 import os
 import json
 from datetime import datetime
+import logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 def add_parser(subparsers):
     p = subparsers.add_parser('register',
@@ -51,10 +54,10 @@ def register(args):
     
     try:
         sanity_check_and_register(args)
-        print(f"Run registered successfully for cluster_name={args.cluster_name}, arch={args.arch}, batch_id={args.batch_id}")
+        logger.info(f"Run registered successfully for cluster_name={args.cluster_name}, arch={args.arch}, batch_id={args.batch_id}")
     except AssertionError as ae:
-        print(f"Sanity check failed: {ae}")
-        return 
+        logger.error(f"Sanity check failed: {ae}")
+        raise
     except Exception as e:
-        print(f"Error during registration: {e}")
-        return 
+        logger.error(f"Error during registration: {e}")
+        raise

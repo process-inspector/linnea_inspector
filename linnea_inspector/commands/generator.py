@@ -6,6 +6,10 @@ import json
 import random
 import argparse
 import shutil
+import logging
+from metascribe.rocks_store import RocksStore
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 def parse_kwargs(tokens):
     out = {}
@@ -43,9 +47,20 @@ def parse_kwargs(tokens):
 
 def add_parser(subparsers):
     # may be gen_dir should be arg
-    p = subparsers.add_parser('generator',
-                              usage="linnea-inspector generator --generation_dir <dir> --language [Julia,] --precision=[Float32, Float64] --equations_file <file> [--config <config_file>] [--expr_name <name>] [problem sizes kwargs] [--overwrite]",
-                              help='Generate algorithms using Linnea.')
+    p = subparsers.add_parser(
+        'generator',
+        usage=(
+            "linnea-inspector generator --generation_dir <dir> "
+            "--language [Julia] "
+            "--precision [Float32|Float64] "
+            "--equations_file <file> "
+            "[--expr_name <name>] "
+            "[--overwrite] "
+            "[--store_dir <dir>] "
+            "[problem size kwargs] "
+        ),
+        help='Generate algorithms using Linnea.'
+    )
     p.add_argument("--generation_dir", required=True, help="Directory to store generated algorithms.")
     p.add_argument("--language", required=True, help="Programming language for the generated code (currently supports: Julia, ).")
     p.add_argument("--equations_file", required=True, help="Path to the equations file.")
@@ -55,6 +70,7 @@ def add_parser(subparsers):
     p.add_argument("--gen_time_limit_sec", required=False, type=int, default=60, help="Time limit in seconds for the generation process. Default is 60 seconds.")
     p.add_argument("--pruning_factor", required=False, type=float, default=1.0, help="Pruning factor from linnea")
     p.add_argument("--overwrite", action='store_true', help="Whether to overwrite the generation directory if it already exists. Default is False.")
+    p.add_argument("--store_dir", required=False, help="If provided, restores the previously generated algorithms from the store.")
     
 
 def sanity_check_and_configure(args, params):
@@ -107,9 +123,7 @@ def sanity_check_and_configure(args, params):
       
     config['language'] = language
     config['precision'] = precision
-    
-
-        
+          
     config['expr_name'] = expr_name
     config['generation_dir'] = args.generation_dir
     config['equations_file'] = equations_file
@@ -125,7 +139,7 @@ def sanity_check_and_configure(args, params):
     
     if os.path.exists(config['generation_dir']):
         if args.overwrite:
-            print(f"Warning: Generation directory {config['generation_dir']} already exists. Overwriting as --overwrite flag is set.")
+            logger.info(f"Warning: Generation directory {config['generation_dir']} already exists. Overwriting as --overwrite flag is set.")
             shutil.rmtree(config['generation_dir'])
             os.makedirs(config['generation_dir'], exist_ok=True)
         else:
@@ -133,20 +147,7 @@ def sanity_check_and_configure(args, params):
         
     return expr_name, equations, prob_size, config
     
-
-def generator(args, params):
-    random.seed(0)
-    
-    try:
-        expr_name, equations, prob_size, config = sanity_check_and_configure(args, params)
-    except AssertionError as ae:
-        print(f"Sanity check failed: {ae}")
-        return
-    except ValueError as ve:
-        print(f"Configuration error: {ve}")
-        return
-    
-        
+def _generate_algorithms_linnea(config, equations):
     gen_dir = os.path.abspath(config["generation_dir"])
     if gen_dir.endswith("/"):
         gen_dir = gen_dir[:-1]
@@ -159,6 +160,8 @@ def generator(args, params):
     time_limit_sec = config["gen_time_limit_sec"]
     pruning_factor = config["pruning_factor"]
     num_algs_limit = config["num_algs_limit"]
+    
+    logger.info(f"Generating algorithms with Linnea")
     
     graph = SearchGraph(equations)
     graph.generate(time_limit=time_limit_sec,
@@ -173,8 +176,75 @@ def generator(args, params):
                        algorithms_limit=num_algs_limit,
                        graph=False,
                        no_duplicates=True)
+
+
+def _restore_algorithms(config, store_dir):
+           
+        alg_db_path = os.path.join(store_dir, "algorithms")
+        
+        if not os.path.exists(alg_db_path):
+            logger.warning(f"Algorithms RocksDB not found at {alg_db_path}")
+            raise FileNotFoundError(f"Algorithms RocksDB not found at {alg_db_path}")
+        
+
+        
+        prob_size = config['prob_size']
+        
+        pkey = ""
+        for param in sorted(prob_size):
+            pkey += f"{param}_eq_{prob_size[param]}+"
+        pkey = pkey[:-1]
+        
+        algs = {}
+        with RocksStore(alg_db_path, lock=True) as store:
+            alg_prefix = f"/algorithms/{pkey}/"
+            for key in store._store.keys():
+                if key.startswith(alg_prefix):
+                    alg_code = store.get_string(key)
+                    alg_name = key.split("/")[-1]
+                    algs[alg_name] = alg_code
+                
+            
+        if len(algs) == 0:
+            raise ValueError(f"No algorithms found in store {store_dir} for problem size {prob_size}")
+        
+        #make dir gendir/Julia/generated
+        alg_codes_path = os.path.join(config["generation_dir"], "Julia", "generated")
+        os.makedirs(alg_codes_path, exist_ok=True)
+        
+        logger.info(f"Restoring algorithms from store {store_dir}")
+        for alg_name, alg_code in algs.items():
+            alg_code_path = os.path.join(alg_codes_path, f"{alg_name}.jl")
+            with open(alg_code_path, 'w') as f:
+                f.write(alg_code)
+                
+
+def generator(args, params):
+    random.seed(0)
     
-    alg_config_path = os.path.join(gen_dir, "gen_config.json")
+    try:
+        expr_name, equations, prob_size, config = sanity_check_and_configure(args, params)
+    except AssertionError as ae:
+        logger.error(f"Sanity check failed: {ae}")
+        raise
+    except ValueError as ve:
+        logger.error(f"Configuration error: {ve}")
+        raise
+           
+    if args.store_dir:
+        try:
+            _restore_algorithms(config, args.store_dir)
+        except Exception as e:
+            logger.error(f"Error during algorithm restoration: {e}")
+            raise
+    else:
+        try:
+            _generate_algorithms_linnea(config, equations)
+        except Exception as e:
+            logger.error(f"Error during algorithm generation: {e}")
+            raise
+    
+    alg_config_path = os.path.join(config["generation_dir"], "gen_config.json")
     with open(alg_config_path, 'w') as f:
         json.dump(config, f, indent=4)
         

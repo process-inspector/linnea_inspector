@@ -100,6 +100,8 @@ linnea-inspector generator --equations_file examples/gls_equations.py --generati
 ```
 Apart from the algorithms, the `generation_dir` also contains a `json` file which stores the argument values (such as the problem sizes) that could be passed to the later stages of the workflow.
 
+Instead of generating new algorithms, it is also possible to restore previously generated algorithms that was saved in a key value store duing the execution of step 4 (described below). To restore the algorithms, provide the path to the store via the `--store_dir` argument. 
+
 ### 2) Generate Run Scripts
 
 The generated algorithms are provided as functions that can be plugged into an arbitrary Julia application. Therefore, a templated run script is required to run the algorithms for measurements. The Julia run script for the GLS expression is shown below. The template file should contain the placeholder `{algorithm_id}` which is replaced by the actual function name of the generated algorithm. The number of threads (`{nthreads}`) and repetitions (`{nreps}`) are passed as parameters to the runner command and are replaced in the template file as shown below. The problem size placeholders `{n}` and `{m}` are replaced by the values specified during the generation step, which are stored in the `json` file in the `generation_dir`. The environment variable `LINNEA_RUN_ID` is set for each repetition, which is used in the algorithm code to log the kernel traces with the corresponding run ID.

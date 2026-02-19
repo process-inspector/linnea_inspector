@@ -8,4 +8,5 @@ python -m linnea_inspector.cli generator \
         --equations_file=tests/generation/gls/equations.py \
         --m 2048 -n 128 \
         --expr_name=GLS \
-        --overwrite
+        --overwrite \
+        # --store_dir=tests/store/test.cli

@@ -72,6 +72,11 @@ def runner(args):
     # Make run.sh executable
     os.chmod(run_script_path, 0o755)
     
+    prob_size_str = ""
+    for param in sorted(prob_size):
+        prob_size_str += f"{param}_eq_{prob_size[param]}+"
+    prob_size_str = prob_size_str[:-1]
+    
     run_config = {
         "language": gen_config["language"],
         "precision": gen_config["precision"],
@@ -79,7 +84,7 @@ def runner(args):
         "equation": gen_config["equation"],
         "eqn_input": gen_config["eqn_input"],
         "eqn_output": gen_config["eqn_output"],
-        "prob_size": "+".join([f"{k}_eq_{v}" for k, v in prob_size.items()]),
+        "prob_size": prob_size_str,
         "nthreads": nthreads,
         "niter": nreps,
         "alg_codes_path": os.path.abspath(os.path.join(gen_dir, "Julia/generated")),

@@ -40,15 +40,15 @@ options:
   -h, --help            show this help message and exit
 
 commands:
-  {generator,runner,register,process,clean,sbatch,widget,store}
+  {generator,runner,register,process,clean,sbatch,store,widget}
     generator           Generate algorithms using Linnea.
     runner              Generate run scripts for the generated algs.
     register            Register a run by linnea inspector.
     process             Process the trace files from the experiment runs and store the results in the linnea store.
     clean               Clean up data from failed runs.
     sbatch              Wrapper around sbatch that accepts arguments from a parameter file
+    store               Commands to interact with the store. Subcommands: clean-logs, archive, extract, modify
     widget              Launch the Linnea Inspector web application.
-    store               Lauch the Linnea Inspector store web application.
 ```
 
 ## Preparation of Process Models
@@ -100,7 +100,7 @@ linnea-inspector generator --equations_file examples/gls_equations.py --generati
 ```
 Apart from the algorithms, the `generation_dir` also contains a `json` file which stores the argument values (such as the problem sizes) that could be passed to the later stages of the workflow.
 
-Instead of generating new algorithms, it is also possible to restore previously generated algorithms that was saved in a key value store duing the execution of step 4 (described below). To restore the algorithms, provide the path to the store via the `--store_dir` argument. 
+Instead of generating new algorithms, it is also possible to restore previously generated algorithms that was saved in a key value store duing the execution of step 4 (described below). To restore the algorithms, provide the path to the store via the `--store_dir` argument. In this case, Linnea is not used, and the generation fails if the store does not contain any algorithms for the specified equation and problem size.
 
 ### 2) Generate Run Scripts
 

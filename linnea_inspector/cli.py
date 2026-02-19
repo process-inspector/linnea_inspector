@@ -1,5 +1,5 @@
 import argparse
-from .commands import generator, runner, register, process, clean, sbatch
+from .commands import generator, runner, register, process, clean, sbatch, store, widget
 
 def main(argv=None):
     
@@ -13,20 +13,18 @@ def main(argv=None):
     process.add_parser(subparsers)
     clean.add_parser(subparsers)
     sbatch.add_parser(subparsers)
+    store.add_parser(subparsers)
+    widget.add_parser(subparsers)
 
     # run.add_parser(subparsers)
     # process.add_parser(subparsers)
-    subparsers.add_parser("widget", help="Launch the Linnea Inspector web application.")
-    subparsers.add_parser("store", help="Lauch the Linnea Inspector store web application.")
+    # subparsers.add_parser("widget", help="Launch the Linnea Inspector web application.")
+    # subparsers.add_parser("widget-store", help="Lauch the web application to modify store data.")
 
     args, params = parser.parse_known_args(argv)
 
     if args.command == "widget":
-        from .widget.inspector import main as inspector_main
-        inspector_main()
-    elif args.command == "store":
-        from .widget.store import main as store_main
-        store_main()
+        widget.widget(args)
     elif args.command == "generator":
         generator.generator(args, params)
     elif args.command == "runner":
@@ -39,6 +37,8 @@ def main(argv=None):
         clean.clean(args)
     elif args.command == "sbatch":
         sbatch.sbatch(args, params)
+    elif args.command == "store":
+        store.store(args)
     else:
         raise ValueError(f"Unknown command: {args.command}")
     

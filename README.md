@@ -51,6 +51,12 @@ commands:
     widget              Launch the Linnea Inspector web application.
 ```
 
+For each command, you can run `linnea-inspector <command> -h` to get more information about the usage and the required arguments. For example, 
+
+```bash
+linnea-inspector generator -h
+```
+
 ## Preparation of Process Models
 
 The typical workflow to prepare process models using Linnea Inspector involves the following steps:
